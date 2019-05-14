@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:/ajax/
+Sitemap:https://music.gameandme.fr/sitemap.xml
