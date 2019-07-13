@@ -25,8 +25,10 @@ if (isset($artist->similar )){
 								$sImage = $oArtist->image[2]->$sTxt;
 							}
 							
-							if ($oArtist->mbid != ""){
-								$sImage = Helpers::getPic($oArtist->mbid,$sImage);
+							if (isset($oArtist->mbid)){
+								if ($oArtist->mbid != ""){
+									$sImage = Helpers::getPic($oArtist->mbid,$sImage);
+								}
 							}
 							?>
 							<img height="90" width="120" <?php if ($i>4){echo "data-";} ?>src="<?php echo $sImage;?>" />

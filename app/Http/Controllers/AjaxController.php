@@ -145,19 +145,24 @@ class AjaxController extends BaseController
 	
 	//On requete un truc
 	public function keyword(Request $request){
-		$album = new Album();
-		$sBio = file_get_contents("https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($request->input("keywords"))."&maxResults=50&key=".config("app.YOUTUBE_API"));
-		if (trim($sBio) != ""){
-			$album->youtube =$sBio;
+		try{
+			$album = new Album();
+			$sBio = file_get_contents("https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($request->input("keywords"))."&maxResults=50&key=".config("app.YOUTUBE_API"));
+			if (trim($sBio) != ""){
+				$album->youtube =$sBio;
+			}
+			$lives = null;
+			$videos = null;
+			if ($request->input("div_id") == "lives_youtube"){
+				$lives = View::make('ajax/part-videos', compact('album'))->render();
+			}else{
+				$videos = View::make('ajax/part-videos', compact('album'))->render();	
+			}		
+			
+			return view('ajax/blocs', compact('videos','lives') );
+		}catch(\Exception $e){
+			echo $e->getMessage();
 		}
-		
-		if ($request->input("div_id") == "lives_youtube"){
-			$lives = View::make('ajax/part-videos', compact('album'))->render();
-		}else{
-			$videos = View::make('ajax/part-videos', compact('album'))->render();	
-		}		
-		
-		return view('ajax/blocs', compact('videos','lives') );
 	}
 	
 	public function autocomplete(Request $request){
