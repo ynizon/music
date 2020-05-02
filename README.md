@@ -1,12 +1,15 @@
 # music
-Music website (mashup lastfm / youtube) with Laravel
+A web interface, to discover new music.
+Mashup lastfm / youtube with Laravel
+
+#screenshots
+<img src="./public/images/screenshot_1.png" />
+<img src="./public/images/screenshot_1.png" />
 
 # config
-Google Service Account need to store in config/t412-174617-2943404bd220.json
-
-LastFM API in config/lastfm
-
-The others in config/app
+Google Service Account need to store in config/t412-174617-2943404bd220.json<br/>
+LastFM API in config/lastfm<br/>
+The others settings in config/app and .env
 
 # demo
 https://music.gameandme.fr
