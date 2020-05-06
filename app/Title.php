@@ -4,6 +4,7 @@ namespace App;
 
 use Google\Cloud\Datastore\Entity;
 use App\Datastoremodel;
+use App\Providers\HelperServiceProvider;
 
 class Title extends DSModel
 {
@@ -36,7 +37,8 @@ class Title extends DSModel
 		}
 		
 		if ($bRefresh or !isset($this->youtube)){
-			$sBio = file_get_contents("https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($this->artist." ".$this->name)."&maxResults=50&key=".config("app.YOUTUBE_API"));
+			$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($this->artist." ".$this->name)."&maxResults=50&key=".config("app.YOUTUBE_API");
+			$sBio = HelperServiceProvider::getYoutubeData($url);
 			if (trim($sBio) != ""){
 				$this->youtube =$sBio;
 				$bSave = true;

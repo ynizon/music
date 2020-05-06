@@ -18,15 +18,6 @@ class Checkmaintenance
 			}
 		}
 		
-		
-		//Check if restrict ip
-		$tabIp = config("app.ONLY_IP");
-		if (count($tabIp)>0){
-			if (!in_array($_SERVER['REMOTE_ADDR'],$tabIp) and $_SERVER["REQUEST_URI"] != "/busy"){	
-				return Redirect::to('/busy');
-			}
-		}
-		
 		return $next($request);
     }
 }

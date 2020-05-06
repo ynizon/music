@@ -346,7 +346,7 @@ abstract class HelperServiceProvider extends ServiceProvider
 				$nbJoursTimestamp = $date2 - $date1;		 
 				$nbJours = round($nbJoursTimestamp/86400,0); // 86 400 = 60*60*24
 
-				if ($nbJours<30){ 
+				if ($nbJours<config("app.delay_cache")){ 
 					$r = $cache;
 					
 					//On envoie le last modified uniquement lorsqu on affiche toute la page (et pas les blocs ajax)
@@ -492,5 +492,18 @@ abstract class HelperServiceProvider extends ServiceProvider
 		$extrait = substr($string,0,strrpos($extrait,' ')).$sep;
 		$extrait2 = strstr(substr($string, -$end,$end),' ');
 		return str_replace("\n","",$extrait.' '.$extrait2);
+	}
+	
+	public static function getYoutubeData($url){
+		//Check if restrict ip
+		$tabIp = config("app.ONLY_IP");
+		if (count($tabIp)>0){
+			if (!in_array($_SERVER['REMOTE_ADDR'],$tabIp) and $_SERVER["REQUEST_URI"] != "/busy"){	
+				return Redirect::to('/busy');
+			}
+		}
+		
+		$s = file_get_contents($url);
+		return $s;
 	}
 }

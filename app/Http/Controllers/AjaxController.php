@@ -147,7 +147,8 @@ class AjaxController extends BaseController
 	public function keyword(Request $request){
 		try{
 			$album = new Album();
-			$sBio = file_get_contents("https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($request->input("keywords"))."&maxResults=50&key=".config("app.YOUTUBE_API"));
+			$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($request->input("keywords"))."&maxResults=50&key=".config("app.YOUTUBE_API");
+			$sBio = HelperServiceProvider::getYoutubeData($url);
 			if (trim($sBio) != ""){
 				$album->youtube =$sBio;
 			}

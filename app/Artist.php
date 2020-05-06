@@ -4,6 +4,7 @@ namespace App;
 
 use Google\Cloud\Datastore\Entity;
 use App\Datastoremodel;
+use App\Providers\HelperServiceProvider;
 
 class Artist extends DSModel
 {
@@ -73,14 +74,16 @@ class Artist extends DSModel
 			}
 		}
 		if ($bRefresh or !isset($artist->youtube_full_album)){
-			$sBio = file_get_contents("https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($this->name." full album")."&maxResults=50&key=".config("app.YOUTUBE_API"));			
+			$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($this->name." full album")."&maxResults=50&key=".config("app.YOUTUBE_API");
+			$sBio = HelperServiceProvider::getYoutubeData($url);
 			if (trim($sBio) != ""){
 				$this->youtube_full_album = $sBio;
 				$bSave = true;
 			}
 		}
 		if ($bRefresh or !isset($artist->youtube_live)){
-			$sBio = file_get_contents("https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($this->name." live")."&maxResults=50&key=".config("app.YOUTUBE_API"));			
+			$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($this->name." live")."&maxResults=50&key=".config("app.YOUTUBE_API");
+			$sBio = HelperServiceProvider::getYoutubeData($url);
 			if (trim($sBio) != ""){
 				$this->youtube_live = $sBio;
 				$bSave = true;

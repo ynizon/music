@@ -4,6 +4,7 @@ return [
 
 # Google credentials and configuration	
 	"ONLY_IP" => [],//"89.89.89.89"
+	"DELAY_CACHE"=>300,
 	"ANALYTICS_UA"=>"",
 	"YOUTUBE_API"=>"",
 	"FLICKR_API"=>"",
