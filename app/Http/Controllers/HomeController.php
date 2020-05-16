@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Response;
 
+use Log;
 use Cookie;
 use Illuminate\Http\Request;
 use App\Repositories\ArtistRepository;
@@ -263,6 +264,7 @@ class HomeController extends Controller
 					$cmd=$dir."/youtube-dl.exe --add-metadata --extract-audio -o \"".$dir."/mp3/%(title)s.%(ext)s\" --audio-format mp3 --embed-thumbnail ".$url;
 					//echo $cmd;exit();
 					shell_exec($cmd);
+					//Log::info(shell_exec($cmd));
 						
 					$info = "Vos musiques sont dans le répertoire ".$dir."/mp3. Merci de les déplacer/Supprimer.";
 					$class="success";

@@ -1,8 +1,10 @@
 /node_modules
+/storage/cache/*
 /public/hot
 /public/mydownload/mp3/*
 /public/storage
 /storage/*.key
+/storage/framework/*
 /vendor
 /.idea
 /.vscode

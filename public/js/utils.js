@@ -162,6 +162,7 @@ function loadVideo(sVideoId, sVideoTitle){
 	}
 	
 	$("#download").attr("href","https://ycapi.org/iframe/?f=mp3&v="+sVideoId);
+	$("#download").attr("href","/download?url=https://www.youtube.com/watch?v="+sVideoId);
 	//$('#download').attr('href','/download?id='+sVideoId+'&name='+ sVideoTitle);
 	$('#download').css('display','inline');
 		
