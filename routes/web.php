@@ -17,6 +17,10 @@ Route::get('/maintenance', 'MaintenanceController@index');
 Route::get('/maintenance/admin', 'MaintenanceController@admin');
 Route::post('/maintenance/admin', 'MaintenanceController@admin');
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/download', 'HomeController@download');
+Route::post('/download', 'HomeController@download');
+
+Route::get('/mydownload/mp3', 'HomeController@download');
 
 Route::get('/', 'HomeController@index');
 Route::get('/sitemap.xml', 'HomeController@sitemap');

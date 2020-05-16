@@ -245,4 +245,33 @@ class HomeController extends Controller
 		$content = view('page/sitemap');
 		return Response::make($content, '200')->header('Content-Type', 'text/xml');
 	}
+	
+	public function download(Request $request){
+		$info = "";
+		$class="";
+		if (config("app.DOWNLOAD_AVAILABLE")){
+			$dir = public_path()."/mydownload";
+			if (!is_dir($dir."/mp3")){
+				mkdir($dir."/mp3");
+			}
+			$files = scandir($dir."/mp3");
+			if ($request->input("url") != ""){
+				$url = $request->input("url");
+				if (stripos($url,"youtube.com") !== false){					
+					set_time_limit(0);
+					
+					$cmd=$dir."/youtube-dl.exe --add-metadata --extract-audio -o \"".$dir."/mp3/%(title)s.%(ext)s\" --audio-format mp3 --embed-thumbnail ".$url;
+					//echo $cmd;exit();
+					shell_exec($cmd);
+						
+					$info = "Vos musiques sont dans le répertoire ".$dir."/mp3. Merci de les déplacer/Supprimer.";
+					$class="success";
+				}else{
+					$info = "Vos musiques doivent provenir de youtube.com.";
+					$class="danger";
+				}
+			}
+			return view('page/download', compact("info","class","files"));
+		}
+	}
 }
