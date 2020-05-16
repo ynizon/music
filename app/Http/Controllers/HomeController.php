@@ -261,7 +261,12 @@ class HomeController extends Controller
 				if (stripos($url,"youtube.com") !== false){					
 					set_time_limit(0);
 					
-					$cmd=$dir."/youtube-dl.exe --add-metadata --extract-audio -o \"".$dir."/mp3/%(title)s.%(ext)s\" --audio-format mp3 --embed-thumbnail ".$url;
+					if (stripos($url,"playlist") !== false){
+						$cmd=$dir."/youtube-dl.exe --add-metadata --extract-audio -o \"".$dir."/mp3/%(playlist_index)s-%(title)s.%(ext)s\" --audio-format mp3 --embed-thumbnail ".$url;
+					}else{
+						$cmd=$dir."/youtube-dl.exe --add-metadata --extract-audio -o \"".$dir."/mp3/%(title)s.%(ext)s\" --audio-format mp3 --embed-thumbnail ".$url;
+					}
+					
 					//echo $cmd;exit();
 					shell_exec($cmd);
 					//Log::info(shell_exec($cmd));
