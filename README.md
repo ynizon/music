@@ -10,6 +10,3 @@ Mashup lastfm / youtube with Laravel
 Google Service Account need to store in config/t412-174617-2943404bd220.json<br/>
 LastFM API in config/lastfm<br/>
 The others settings in config/app and .env
-
-# demo
-https://music.gameandme.fr
