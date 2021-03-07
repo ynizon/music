@@ -2,20 +2,22 @@
 
 return [
 
-# Google credentials and configuration	
-	"ONLY_IP" => [],//"89.89.89.89"
+# Google credentials and configuration
+	"ONLY_IP" => explode(",",env("ONLY_IP")),
+	"LASTFM_API"=>env("LASTFM_API"),//Non utilisee
+	"LASTFM_SECRET"=>env("LASTFM_SECRET"),//Non utilisee
 	"DELAY_CACHE"=>300,
-	"ANALYTICS_UA"=>"",
-	"YOUTUBE_API"=>"",
-	"FLICKR_API"=>"",
-	'AMAZON_AWS_API_KEY'=> '',
-	'AMAZON_AWS_API_SECRET_KEY'=> '',
-	'AMAZON_ASSOCIATE_TAG'=>'',
-	'AMAZON_LANGUAGE'=>'fr',
-	"MUSESCORE_API"=>"",
-	"MUSESCORE_SECRET"=>"",
-	"DOWNLOAD_AVAILABLE"=>true,
-	"maintenance_password"=>"admin",
+	"ANALYTICS_UA"=>env("ANALYTICS_UA"),
+	"YOUTUBE_API"=>env("YOUTUBE_API"),
+	"FLICKR_API"=>env("FLICKR_API"),
+	'AMAZON_AWS_API_KEY'=> env('AMAZON_AWS_API_KEY'),
+	'AMAZON_AWS_API_SECRET_KEY'=> env('AMAZON_AWS_API_SECRET_KEY'),
+	'AMAZON_ASSOCIATE_TAG'=>env('AMAZON_ASSOCIATE_TAG'),
+	'AMAZON_LANGUAGE'=>env('AMAZON_LANGUAGE','fr'),
+	"MUSESCORE_API"=>env("MUSESCORE_API"),
+	"MUSESCORE_SECRET"=>env("MUSESCORE_SECRET"),
+	"DOWNLOAD_AVAILABLE"=>env("DOWNLOAD_AVAILABLE",false),
+	"maintenance_password"=>env("maintenance_password","admin"),
 
     /*
     |--------------------------------------------------------------------------

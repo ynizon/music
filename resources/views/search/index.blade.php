@@ -102,6 +102,8 @@ if (isset($title)){
 									Cliquez sur une vidéo pour la lancer.<br/>
 									<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 									<!-- Music Gameandme -->
+									<?php
+									/*
 									<ins class="adsbygoogle"
 										 style="display:block"
 										 data-ad-client="ca-pub-1192949141732311"
@@ -110,6 +112,9 @@ if (isset($title)){
 									<script>
 									(adsbygoogle = window.adsbygoogle || []).push({});
 									</script>
+									*/
+									?>
+									<script data-ad-client="ca-pub-1192949141732311" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 								</div>
 								<iframe allow="autoplay" id="youtube" width="480" height="360" src="" frameborder="0" allowfullscreen="allowfullscreen" frameBorder="0" scrolling="no" style="display:none"></iframe>
 								<div style="text-align:center">
