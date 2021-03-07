@@ -241,14 +241,6 @@ use App\Providers\HelperServiceProvider;
 		<div class="grid_3">
 		  <div class="container">
 			 <ul id="footer-links">
-				<?php
-				if (config("app.DOWNLOAD_AVAILABLE")){
-					?>
-					<li><a href="/download">Téléchargement</a></li>
-					<li style="color:#fff"> | </li>
-					<?php
-				}
-				?>
 				<li><a href="/faq">Faq</a></li>
 				<li style="color:#fff"> | </li>
 				<li><a href="/contact">Contact</a></li>
