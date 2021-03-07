@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 use Response;
 
-use Log;
 use Cookie;
 use Illuminate\Http\Request;
 use App\Repositories\ArtistRepository;
@@ -92,6 +91,21 @@ class HomeController extends Controller
         return view('page/welcome', compact('artistes','preferences','similar','artist_name'));
     }
 	
+	public function lastfm_login(Request $request){
+		$lastfm_login = "";
+		if ("" != Cookie::get('lastfm_login')){
+			$lastfm_login = Cookie::get('lastfm_login');
+		}
+
+		if ($request->input("lastfm_login") != ""){
+			$lastfm_login = $request->input("lastfm_login");
+			Cookie::queue("lastfm_login", $lastfm_login, 1314000);
+			return redirect('/');
+		}else{
+			return view('lastfm/index', compact('lastfm_login'));
+		}		
+	}
+	
 	/**
      * Busy page
      *
@@ -152,21 +166,6 @@ class HomeController extends Controller
 		
         return view('page/busy', compact('artistes','preferences','similar','artist_name'));
     }
-	
-	public function lastfm_login(Request $request){
-		$lastfm_login = "";
-		if ("" != Cookie::get('lastfm_login')){
-			$lastfm_login = Cookie::get('lastfm_login');
-		}
-
-		if ($request->input("lastfm_login") != ""){
-			$lastfm_login = $request->input("lastfm_login");
-			Cookie::queue("lastfm_login", $lastfm_login, 1314000);
-			return redirect('/');
-		}else{
-			return view('lastfm/index', compact('lastfm_login'));
-		}		
-	}
 	
 	public function faq(Request $request){
 		return view('page/faq');
@@ -248,37 +247,25 @@ class HomeController extends Controller
 	}
 	
 	public function download(Request $request){
-		$info = "";
-		$class="";
-		if (config("app.DOWNLOAD_AVAILABLE")){
-			$dir = public_path()."/mydownload";
-			if (!is_dir($dir."/mp3")){
-				mkdir($dir."/mp3");
+		$name = $request->input('name');
+		$id = $request->input("id");
+		$url = "https://www.youtube.com/watch?v=".$id;
+		$dir = storage_path('app').'/download';
+		$files = scandir($dir);
+		foreach ($files as $file){
+			if ($file != "." and $file != ".."){
+				unlink($dir.'/'.$file);
 			}
-			$files = scandir($dir."/mp3");
-			if ($request->input("url") != ""){
-				$url = $request->input("url");
-				if (stripos($url,"youtube.com") !== false){					
-					set_time_limit(0);
-					
-					if (stripos($url,"playlist") !== false){
-						$cmd=$dir."/youtube-dl.exe --add-metadata --extract-audio -o \"".$dir."/mp3/%(playlist_index)s-%(title)s.%(ext)s\" --audio-format mp3 --embed-thumbnail ".$url;
-					}else{
-						$cmd=$dir."/youtube-dl.exe --add-metadata --extract-audio -o \"".$dir."/mp3/%(title)s.%(ext)s\" --audio-format mp3 --embed-thumbnail ".$url;
-					}
-					
-					//echo $cmd;exit();
-					shell_exec($cmd);
-					//Log::info(shell_exec($cmd));
-						
-					$info = "Vos musiques sont dans le répertoire ".$dir."/mp3. Merci de les déplacer/Supprimer.";
-					$class="success";
-				}else{
-					$info = "Vos musiques doivent provenir de youtube.com.";
-					$class="danger";
-				}
+		}
+		
+		$cmd = 'youtube-dl --prefer-ffmpeg --ffmpeg-location /opt/ffmpeg/ffmpeg --output "'.$dir.'/%(title)s.%(ext)s" --extract-audio --audio-format mp3 '.$url;
+		shell_exec($cmd);
+
+		$files = scandir($dir);
+		foreach ($files as $file){
+			if ($file != "." and $file != ".."){
+				return response()->download($dir.'/'.$file);
 			}
-			return view('page/download', compact("info","class","files"));
 		}
 	}
 }

@@ -110,8 +110,10 @@
 											<div class="bloc_home">
 												<?php
 												$pic = $oArtist->image[2]->$sTxt;
-												if ($oArtist->mbid != ""){
-													$pic = Helpers::getPic($oArtist->mbid,$pic);
+												if (isset($oArtist->mbid)){
+													if ($oArtist->mbid != ""){
+														$pic = Helpers::getPic($oArtist->mbid,$pic);
+													}
 												}
 												?>
 												<img style="max-height:174px;margin:auto;" src="<?php echo $pic;?>" class="img-responsive" alt="<?php echo str_replace('"','\"',$oArtist->name);?>"/>

@@ -161,9 +161,8 @@ function loadVideo(sVideoId, sVideoTitle){
 		$('#youtube').attr('src','https://www.youtube.com/embed/'+sVideoId +'?autoplay=1&wmode=transparent');
 	}
 	
-	$("#download").attr("href","https://ycapi.org/iframe/?f=mp3&v="+sVideoId);
-	$("#download").attr("href","/download?url=https://www.youtube.com/watch?v="+sVideoId);
-	//$('#download').attr('href','/download?id='+sVideoId+'&name='+ sVideoTitle);
+	//$("#download").attr("href","https://ycapi.org/iframe/?f=mp3&v="+sVideoId);
+	$('#download').attr('href','/download?id='+sVideoId+'&name='+ sVideoTitle);
 	$('#download').css('display','inline');
 		
 	//Verification des licences, pour relancer la video si besoin

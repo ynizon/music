@@ -346,7 +346,7 @@ abstract class HelperServiceProvider extends ServiceProvider
 				$nbJoursTimestamp = $date2 - $date1;		 
 				$nbJours = round($nbJoursTimestamp/86400,0); // 86 400 = 60*60*24
 
-				if ($nbJours<config("app.delay_cache")){ 
+				if ($nbJours<=config("app.delay_cache")){ 
 					$r = $cache;
 					
 					//On envoie le last modified uniquement lorsqu on affiche toute la page (et pas les blocs ajax)
