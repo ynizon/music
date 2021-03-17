@@ -338,7 +338,7 @@ abstract class HelperServiceProvider extends ServiceProvider
 		}		
 		$cachefile .= rawurlencode($filename.".txt");
 		
-		if (!config("app.debug")){
+		if (!config("app.CACHE")){
 			if (file_exists($cachefile)){
 				$cache = json_decode(gzuncompress(file_get_contents($cachefile)),true);
 				$date1 = strtotime($cache["updated_at"]);

@@ -18,6 +18,7 @@ return [
 	"MUSESCORE_SECRET"=>env("MUSESCORE_SECRET"),
 	"DOWNLOAD_AVAILABLE"=>env("DOWNLOAD_AVAILABLE",false),
 	"maintenance_password"=>env("maintenance_password","admin"),
+	"CACHE"=>env("CACHE",false),
 
     /*
     |--------------------------------------------------------------------------

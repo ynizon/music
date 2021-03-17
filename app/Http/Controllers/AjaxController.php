@@ -79,6 +79,9 @@ class AjaxController extends BaseController
 		$album_name = urldecode($album_name);
 			
 		//Recup du cache
+		$biography = null;
+		$lives = null;
+		$info_album = null;
 		$cache = HelperServiceProvider::getCache($artist_name, $album_name);
 		if (isset($cache["biography"]) and isset($cache["videos"])){
 			if (isset($cache["biography"])){
@@ -97,8 +100,8 @@ class AjaxController extends BaseController
 			}
 			$album->refreshData();
 		
-			$info_album = View::make('ajax/part-infoalbum', compact('artist','album'))->render();
-			$videos = View::make('ajax/part-videos', compact('artist','album'))->render();
+			$info_album = View::make('ajax/part-infoalbum', compact('album'))->render();
+			$videos = View::make('ajax/part-videos', compact('album'))->render();
 			
 			//Ajout du cache
 			$artist = $this->artistRepository->getByName($artist_name);	
