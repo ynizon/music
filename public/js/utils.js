@@ -473,6 +473,17 @@ function searchFor(sDivId,oInput){
 	});
 }
 
+//Recharge les images si marche pas
+function imageRefresh(img, timeout) {
+    setTimeout(function() {
+     var d = new Date;
+     var http = img.src;
+     if (http.indexOf("&d=") != -1) { http = http.split("&d=")[0]; } 
+
+     img.src = http + '&d=' + d.getTime();
+    }, timeout);
+  }
+  
 //Charge les images en differe
 function loadImages() {
     var imgs = document.getElementsByTagName('img');

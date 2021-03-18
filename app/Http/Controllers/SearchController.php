@@ -136,6 +136,7 @@ class SearchController extends BaseController
 	}
 
 	public function picture($mbid, Request $request){
+		header("Content-type: image/png");
 		$url = HelperServiceProvider::getPic($mbid,$request->input('default'));
 		echo file_get_contents($url);
 	}

@@ -41,6 +41,8 @@ if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],config("a
 	Route::get('/artist/{artist_name}', 'SearchController@artist');
 	Route::get('/artist/{artist_name}/{album_name}', 'SearchController@artist_album');
 	Route::get('/artist/{artist_name}/{album_name}/{title_name}', 'SearchController@artist_album_title');	
+	
+	Route::get('/picture/{mbid}', 'SearchController@picture');
 }else{
 	if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/busy"){
 		header("location: /busy");

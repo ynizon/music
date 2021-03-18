@@ -32,7 +32,7 @@ if (isset($artist->similar )){
 								}
 							}
 							?>
-							<img height="90" width="120" <?php if ($i>4){echo "data-";} ?>src="<?php echo $sImage;?>" />
+							<img height="90" width="120" <?php if ($i>4){echo "data-";} ?>src="<?php echo $sImage;?>" onload='imageRefresh(this, 1000);' />
 						</a>
 					</td>
 					<td>
