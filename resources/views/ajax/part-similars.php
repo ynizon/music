@@ -27,7 +27,8 @@ if (isset($artist->similar )){
 							
 							if (isset($oArtist->mbid)){
 								if ($oArtist->mbid != ""){
-									$sImage = Helpers::getPic($oArtist->mbid,$sImage);
+									//$sImage = Helpers::getPic($oArtist->mbid,$sImage);
+									$sImage = "/picture/".$oArtist->mbid."?default=".$sImage;
 								}
 							}
 							?>

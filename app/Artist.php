@@ -30,7 +30,7 @@ class Artist extends DSModel
 			$nbJoursTimestamp = $date2 - $date1;		 
 			$nbJours = round($nbJoursTimestamp/86400,0); // 86 400 = 60*60*24
 
-			if ($nbJours>90){
+			if ($nbJours>config("app.DELAY_CACHE")){ 
 				$bRefresh = true;
 			}
 		}else{

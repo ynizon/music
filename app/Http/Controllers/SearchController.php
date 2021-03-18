@@ -134,5 +134,9 @@ class SearchController extends BaseController
 		
 		return view('search/index',  compact('artist','album','title'));
 	}
-	
+
+	public function picture($mbid, Request $request){
+		$url = HelperServiceProvider::getPic($mbid,$request->input('default'));
+		echo file_get_contents($url);
+	}
 }
