@@ -247,7 +247,7 @@ function pagination(iStep,sClass){
 			iDiapotryl = iDiapo;
 			break;
 	}
-
+    loadImages();
 }
 
 /* Afiche le diaporama */
@@ -501,11 +501,6 @@ function loadImages() {
         }
     }
 }
-
-window.setInterval(function(){
-    loadImages();
-},1000);
-
 
 //Gestion des cookies
 function createCookie(name,value,days) {
