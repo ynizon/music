@@ -24,7 +24,7 @@ if (isset($artist->similar )){
 							if  (trim($oArtist->image[2]->$sTxt)!=""){
 								$sImage = $oArtist->image[2]->$sTxt;
 							}
-							
+
 							if (isset($oArtist->mbid)){
 								if ($oArtist->mbid != ""){
 									//$sImage = Helpers::getPic($oArtist->mbid,$sImage);
@@ -32,7 +32,7 @@ if (isset($artist->similar )){
 								}
 							}
 							?>
-							<img height="90" width="120" <?php if ($i>4){echo "data-";} ?>src="<?php echo $sImage;?>" onload='imageRefresh(this, 1000);' />
+							<img height="90" width="120" <?php if ($i>4){echo "data-";} ?>src="<?php echo $sImage;?>"  />
 						</a>
 					</td>
 					<td>
@@ -60,7 +60,7 @@ if (isset($artist->similar )){
 	</tr>
 	<?php
 }
-?>									
+?>
 
 <script>
 	$( document ).ready(function() {

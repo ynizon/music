@@ -8,7 +8,7 @@ use App\Providers\HelperServiceProvider;
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" type="image/png" href="/images/favicon.png" />
-	
+
 	<?php
 	//Recup des METAS
 	$sUrl = config("app.url").$_SERVER['REQUEST_URI'];
@@ -16,23 +16,23 @@ use App\Providers\HelperServiceProvider;
 	if ($iPos !== false){
 		$sUrl = substr($sUrl,0,$iPos);
 	}
-	
+
 	$sImage = config("app.url")."/images/hp/1.png";
 	$sDescription = "Découvrez la musique que vous aimez";
 	$sTitre = config("app.name");
 	$sTitreShare = config("app.name");
 	if (isset($artist)){
 		if (isset($artist->biography)){
-			$biography = json_decode($artist->biography,true );		
+			$biography = json_decode($artist->biography,true );
 			if (isset($biography["artist"])){
 				$sDescription = HelperServiceProvider::extrait(strip_tags($biography["artist"]["bio"]["summary"]));
 			}
 		}
-		
-		
+
+
 		$sTitre = $artist->name." - toutes les vidéos et les concerts sur " .config("app.name");
 		$sTitreShare = $artist->name;
-		
+
 		if (isset($artist->biography)){
 			$json = json_decode($artist->biography,true);
 			if (isset($json["artist"]["image"])){
@@ -50,7 +50,7 @@ use App\Providers\HelperServiceProvider;
 			$sTitre = $artist->name." - ".$album->name. " - ".$title->name;
 		}
 	}
-	
+
 	?>
 	<link rel="canonical" href="<?php echo $sUrl;?>" />
 	<meta property="og:type" content="website">
@@ -64,7 +64,7 @@ use App\Providers\HelperServiceProvider;
 	<!-- Next tags are optional but recommended -->
 	<meta property="og:image:width" content="398">
 	<meta property="og:image:height" content="585">
-	
+
 	<meta name="twitter:card" content="summary">
 	<meta name="twitter:site" content="@enpix">
 	<meta name="twitter:creator" content="@enpix">
@@ -76,31 +76,31 @@ use App\Providers\HelperServiceProvider;
 	<meta name="msapplication-TileColor" content="#ffffff">
 	<meta name="msapplication-TileImage" content="/images/favicon.png">
 	<meta name="theme-color" content="#ffffff">
-	
-	
+
+
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title id="title_seo"><?php echo $sTitre;?></title>
 
-    <!-- Scripts -->    
-	<?php	
+    <!-- Scripts -->
+	<?php
 	if (config("app.debug")){
 		?>
 		<script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
 		<script src="{{ asset('js/jquery-ui.min.js') }}"></script>
-			
+
 		<!-- <script src="{{ asset('js/jquery.ui.datepicker-fr.js') }}"></script> -->
 		<script src="{{ asset('js/utils.js') }}"></script>
 	<?php
 	}else{
 		?>
-		<script src="{{ asset('js/app.js') }}" ></script>	
+		<script src="{{ asset('js/app.js') }}" ></script>
 		<?php
-	}	
+	}
 	?>
-	
-	
+
+
 	<?php
 		if (config("app.ANALYTICS_UA") != ""){
 		?>
@@ -117,13 +117,13 @@ use App\Providers\HelperServiceProvider;
 		<?php
 		}
 	?>
-    
+
 
 	<!-- Styles -->
-	<?php	
+	<?php
 	if (config("app.debug")){
 		?>
-		<!-- Fonts -->		
+		<!-- Fonts -->
 		<link href="{{ asset('css/bootstrap/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
 		<link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" type="text/css" >
 		<link href="{{ asset('css/jquery-ui.min.css') }}" rel="stylesheet" type="text/css">
@@ -135,25 +135,23 @@ use App\Providers\HelperServiceProvider;
 		<link href="{{ asset('css/app.css') }}" rel="stylesheet" type="text/css">
 	<?php
 	}
-	
-	if (isset($_GET["play"])){
-		?>
-		<script>
-			$( document ).ready(function() {
-				loadVideo('<?php echo $_GET["play"];?>', '');
-			});
-		</script>
-		<?php
-	}
-	?>	
+    ?>
+
+    <script>
+        $( document ).ready(function() {
+            var params = getQueryParams(window.location.search);
+            if (params["play"]){
+                loadVideo(params["play"], params["title"]);
+            }
+        });
+    </script>
 </head>
 <body>
     <div id="app">
-			
+
         <nav class="navbar navbar-expand-md navbar-light navbar-laravel navbar-custom">
             <div class="container">
    				<span style="float:left"><a href="/" title="Accueil"><img width="40" src="/images/logo.png" alt="<?php echo config("app.name");?>"/></a></span>
-				</span>
 
 				<a  class="navbar-brand" href="{{ url('/') }}">
                     <h1 style="margin-top:5px;padding-left:15px;" id="menu_name"><?php if (isset($artist)){echo HelperServiceProvider::replaceUpperChar($artist->name);}else{echo config("app.name");}?></h1>
@@ -161,13 +159,13 @@ use App\Providers\HelperServiceProvider;
                 <button id="toggleNav" class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-				
+
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
 
                     </ul>
-					
+
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ml-auto">
 						<li style="padding:5px" class="menu_q">
@@ -184,11 +182,11 @@ use App\Providers\HelperServiceProvider;
 							<i title="Rechercher" class="fa fa-search cursor" style="color:#fff;font-size:20px;padding:7px;"  onclick="searchX()"></i>
 							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						</li>
-						
+
 						 <li class="nav-item">
 							<a class="nav-link" href="/lastfm_login">Mon compte</a>
 						</li>
-						
+
 						<?php
 						/*
                         <!-- Authentication Links -->
@@ -224,20 +222,20 @@ use App\Providers\HelperServiceProvider;
                 </div>
             </div>
         </nav>
-		
+
         <main class="py-4">
 			<div class="container">
 				@if(session()->has('ok'))
 					<div class="alert alert-success alert-dismissible">{!! session('ok') !!}</div>
 				@endif
-			
+
 				@if(session()->has('error'))
 					<div class="alert alert-danger  alert-dismissible"><?php echo  session('error');?></div>
-				@endif			
+				@endif
 			</div>
             @yield('content')
         </main>
-		
+
 		<div class="grid_3">
 		  <div class="container">
 			 <ul id="footer-links">
@@ -250,7 +248,7 @@ use App\Providers\HelperServiceProvider;
 				<li><a color="#fff" target="_blank" href="https://www.gameandme.fr/creation-web/refonte-du-site-de-musique-music-gameandme-fr/#comments">Suggestions</a></li>
 			 </ul>
 			 <p>
-				<a href="https://www.gameandme.fr/" target="_blank">LEAD DEVELOPPEUR PHP ET EXPERT WEB (SEO) A NANTES - Mon Blog</a> 
+				<a href="https://www.gameandme.fr/" target="_blank">LEAD DEVELOPPEUR PHP ET EXPERT WEB (SEO) A NANTES - Mon Blog</a>
 			 </p>
 		  </div>
 		</div>

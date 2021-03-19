@@ -26,11 +26,11 @@ if (isset($title)){
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <div class="panel panel-default">				
+            <div class="panel panel-default">
                 <div class="panel-body">
-					
+
 					<div id="warning_first" class="alert alert-warning alert-dismissible fade show inv" role="alert" style="margin-top:10px">
-					  <strong>Bonjour visiteur ! </strong><br/>Tu trouveras les informations concernant ton artiste et les artistes similaires sur le coté gauche.<br/> 
+					  <strong>Bonjour visiteur ! </strong><br/>Tu trouveras les informations concernant ton artiste et les artistes similaires sur le coté gauche.<br/>
 					  Les albums se trouvent dans le bloc central. Enfin, je te laisse le choix des vidéos à lancer dans les 2 dernières colonnes.<br/>
 					  N'hésite pas à partager ce site, ni à me contacter pour me suggérer des améliorations via les liens du pied de page.
 					  <button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick="$('#warning_first').fadeOut();createCookie('first_visit','1','365');">
@@ -73,14 +73,14 @@ if (isset($title)){
 									</tbody>
 									<tfoot>
 										<tr>
-											<td colspan="2" class="tc bordertop">	
+											<td colspan="2" class="tc bordertop">
 												<br class="removemobile"/>
 												<img title="Utilisez les flèches du clavier pour aller plus vite" class="cursor " style="visibility:hidden;" src="/images/skip-backward-icon.png" onclick="pagination(-5,'tral');"  id="prevtral"/>
 												<img title="Utilisez les flèches du clavier pour aller plus vite" class="cursor " style="visibility:hidden;" src="/images/skip-forward-icon.png" onclick="pagination(5,'tral');" id="nexttral"/>
 											</td>
 										</tr>
 									</tfoot>
-								</table>								
+								</table>
 							</div>
 							<div style="display:none" id="loader" ><img class="rotate" src="/images/default_rotate.png" /></div>
 							<script>
@@ -92,8 +92,8 @@ if (isset($title)){
 								}
 								?>
 							</script>
-						</div>						
-						
+						</div>
+
 						<div class="col-md-4 col_1 mypad">
 							<h2>Vidéo</h2>
 							<div id="block_youtube" style="max-height:390px;overflow:hidden">
@@ -123,14 +123,22 @@ if (isset($title)){
 									?>
 										<a target="_blank" class="cursor" style="display:none" href='#' id="download" >Télécharger le MP3</a>
 									<?php
+                                        if (config("app.SONOS_AVAILABLE")){
+                                            echo " - ";
+                                        }
 									}
+                                        if (config("app.SONOS_AVAILABLE")){
+                                        ?>
+                                        <a target="_blank" class="cursor" style="display:none" href='#' id="sonos" >Envoyer au SONOS</a>
+                                        <?php
+                                        }
 									?>
 									<span id="link_amazon"></span>
 								</div>
 							</div>
 						</div>
-						
-					
+
+
 						<div class="col-md-4 col_1 mypad">
 							<div class="blockvide" id="block_artistes">
 								<table class="mytable myborder table table-striped" width="100%">
@@ -147,17 +155,17 @@ if (isset($title)){
 									</tbody>
 									<tfoot>
 										<tr>
-											<td colspan="2" class="tc bordertop">	
+											<td colspan="2" class="tc bordertop">
 												<br class="removemobile" />
 												<img title="Utilisez les flèches du clavier pour aller plus vite" class="cursor " style="visibility:hidden;" src="/images/skip-backward-icon.png" onclick="pagination(-5,'tr');" id="prevtr">
 												<img title="Utilisez les flèches du clavier pour aller plus vite" class="cursor " style="visibility: visible;" src="/images/skip-forward-icon.png" onclick="pagination(5,'tr');" id="nexttr">
 											</td>
 										</tr>
 									</tfoot>
-								</table>								
-							</div>							
+								</table>
+							</div>
 						</div>
-						
+
 						<div class="col-md-4 col_1 mypad">
 							<div class="blockvide" id="block_albums_youtube">
 								<table class="mytable myborder table table-striped" width="100%">
@@ -169,22 +177,22 @@ if (isset($title)){
 											</th>
 										</tr>
 									</thead>
-									<tbody id="albums_youtube">										
+									<tbody id="albums_youtube">
 										@include('ajax.part-videos', $tab)
 									</tbody>
 									<tfoot>
 										<tr>
-											<td colspan="2" class="tc bordertop">	
+											<td colspan="2" class="tc bordertop">
 												<br class="removemobile"/>
 												<img title="Utilisez les flèches du clavier pour aller plus vite" class="cursor " style="visibility:hidden;" src="/images/skip-backward-icon.png" onclick="pagination(-5,'trya');" id="prevtrya"/>
 												<img title="Utilisez les flèches du clavier pour aller plus vite" class="cursor " style="visibility:hidden;" src="/images/skip-forward-icon.png" onclick="pagination(5,'trya');"  id="nexttrya"/>
 											</td>
 										</tr>
 									</tfoot>
-								</table>								
+								</table>
 							</div>
 						</div>
-						
+
 						<div class="col-md-4 col_1 mypad">
 							<div class="blockvide" id="block_lives_youtube">
 								<table class="mytable myborder table table-striped" width="100%">
@@ -201,17 +209,17 @@ if (isset($title)){
 									</tbody>
 									<tfoot>
 										<tr>
-											<td colspan="2" class="tc bordertop">	
+											<td colspan="2" class="tc bordertop">
 												<br class="removemobile"/>
 												<img title="Utilisez les flèches du clavier pour aller plus vite" class="cursor " style="visibility:hidden;" src="/images/skip-backward-icon.png" onclick="pagination(-5,'tryl');" id="prevtryl"/>
 												<img title="Utilisez les flèches du clavier pour aller plus vite" class="cursor " style="visibility:hidden;" src="/images/skip-forward-icon.png" onclick="pagination(5,'tryl');" id="nexttryl"/>
 											</td>
 										</tr>
 									</tfoot>
-								</table>								
-							</div>		
+								</table>
+							</div>
 						</div>
-						
+
 						<div class="clearfix"> </div>
 					</div>
                 </div>

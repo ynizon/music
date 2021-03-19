@@ -2,25 +2,25 @@ $(document).ready(function() {
 	$.ajaxSetup({
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
-	
+
 	//Toutes les dates de cette classe ont un date picker
 	//$(".jqdate").datepicker({"helper":"datePickerup","jQueryParams":{"dateFormat":"yyyy-mm-dd"},"options":[]});
-	
+
 	//Efface le warning
 	if (readCookie("first_visit") != '1'){
 		$('#warning_first').show();
 	}
-	
+
 	//Toggle navigation mobile
 	$("#toggleNav").click(function(){
-		$('#navbarSupportedContent').toggleClass('show')	
+		$('#navbarSupportedContent').toggleClass('show')
 	});
-	
+
 	//Button back
 	$("#backbtn").click(function(){
 		window.history.back();
 	});
-	
+
 	addShareBtn();
 });
 
@@ -40,7 +40,7 @@ function encodeMyUrl(s){
 function homeToGo(){
 	if ($('#q2').val() != ""){
 		window.location.href='/artist/'+encodeMyUrl($('#q2').val());
-	}	
+	}
 }
 
 /* Formate les chiffres correctement ex:1 000->1000.00 */
@@ -71,7 +71,7 @@ $( document ).ready(function() {
 			window.location.href='/artist/'+encodeMyUrl($('#q2').val());
 		}
 	});
-	
+
 	$("#q").autocomplete({
 		source: function( request, response ) {
 		$.ajax({
@@ -95,7 +95,7 @@ $( document ).ready(function() {
 			searchX();
 		}
 	});
-	
+
 	$("#album").autocomplete({
 		source: function( request, response ) {
 		$.ajax({
@@ -119,7 +119,7 @@ $( document ).ready(function() {
 			searchX();
 		}
 	});
-	
+
 	$("#title").autocomplete({
 		source: function( request, response ) {
 		$.ajax({
@@ -148,6 +148,7 @@ $( document ).ready(function() {
 
 /* Chargement des videos */
 var sVideoIdOld = '';
+var sVideoTitleOld = '';
 function loadVideo(sVideoId, sVideoTitle){
 	$("#youtube").show();
 	$("#block_youtube").css("display","block");
@@ -155,22 +156,25 @@ function loadVideo(sVideoId, sVideoTitle){
 	$("#youtube").show();
 	$("#youtube").width($("#block_youtube").width());
 
-	if (sVideoId.indexOf('?')>-1){					
+	if (sVideoId.indexOf('?')>-1){
 		$('#youtube').attr('src','https://www.youtube.com/embed/'+sVideoId +'&autoplay=1&wmode=transparent');
 	}else{
 		$('#youtube').attr('src','https://www.youtube.com/embed/'+sVideoId +'?autoplay=1&wmode=transparent');
 	}
-	
+
 	//$("#download").attr("href","https://ycapi.org/iframe/?f=mp3&v="+sVideoId);
 	$('#download').attr('href','/download?id='+sVideoId+'&name='+ sVideoTitle);
 	$('#download').css('display','inline');
-		
+    $('#sonos').attr('href','/sonos?id='+sVideoId+'&name='+ sVideoTitle);
+    $('#sonos').css('display','inline');
+
 	//Verification des licences, pour relancer la video si besoin
 	//checkYoutube(sVideoId, sVideoTitle);
 
-	sVideoIdOld = sVideoId;	
+	sVideoIdOld = sVideoId;
+    sVideoTitleOld = sVideoTitle;
 	updateUrl();
-	
+
 	if ($(window).width()<700){
 		//Pour les mobiles, on remonte un peu sur la video
 		$('html, body').animate({
@@ -187,7 +191,7 @@ var iDiapotrya = 0;
 function pagination(iStep,sClass){
 	$(".diapo"+sClass).hide();
 	var iDiapo2 = 0;
-	
+
 	switch (sClass){
 		case "tr":
 			iDiapo = iDiapotr;
@@ -202,33 +206,33 @@ function pagination(iStep,sClass){
 			iDiapo = iDiapotryl;
 			break;
 	}
-	
-	iDiapo = iDiapo +iStep;				
+
+	iDiapo = iDiapo +iStep;
 	if (iDiapo<0){
 		iDiapo = 0;
 	}
-	iDiapo2 = iDiapo +5;								
-	
+	iDiapo2 = iDiapo +5;
+
 	while (iDiapo<iDiapo2){
 		$("#"+sClass+"_"+iDiapo).fadeIn("slow");
 		iDiapo++;
 	}
-	
+
 	$("#next"+sClass).css("visibility","visible");
 	if (!$("#"+sClass+"_"+(iDiapo+1)).length){
 		$("#next"+sClass).css("visibility","hidden");
 	}
-	
+
 	iDiapo = iDiapo2-5;
 	if (iDiapo<0){
 		iDiapo = 0;
 	}
-	
+
 	$("#prev"+sClass).css("visibility","visible");
 	if (iDiapo == 0){
 		$("#prev"+sClass).css("visibility","hidden");
 	}
-	
+
 	switch (sClass){
 		case "tr":
 			iDiapotr = iDiapo;
@@ -243,7 +247,7 @@ function pagination(iStep,sClass){
 			iDiapotryl = iDiapo;
 			break;
 	}
-	
+
 }
 
 /* Afiche le diaporama */
@@ -268,7 +272,7 @@ function diaporama(){
 				$(this).css({marginLeft:0}).find("li:last").after($(this).find("li:first"));
 			 })
 	  }, 3500);
-	  
+
 	  $(".slideshow ul").unbind("click");
 	  $(".slideshow ul").click(function(){
 			clearInterval(refreshIntervalId);
@@ -279,22 +283,22 @@ function diaporama(){
 }
 
 /* Recherche globale */
-function searchX(){			
+function searchX(){
 	//Reset pagination
 	iDiapotr = 0;
 	iDiapotral = 0;
 	iDiapotryl = 0;
 	iDiapotrya = 0;
-	
-	//$(".pagination").css("visibility","hidden");			
-	
+
+	//$(".pagination").css("visibility","hidden");
+
 	/*
 	$("#artist_name").html('');
 	$("#flickr").html('');
 	$("#artistes").html('');
 	$("#albums_youtube").html('');
 	$("#lives_youtube").html('');
-	
+
 	$(".blockvide").css('visibility','hidden');
 	*/
 
@@ -302,7 +306,7 @@ function searchX(){
 	//$("#albums").html('');
 	$("#block_albums").css('visibility','visible');
 
-	
+
 	if ($("#q").val() != ""){
 		$("#loader").show();
 		updateUrl();
@@ -311,12 +315,12 @@ function searchX(){
 		if ($("#title").val() != "" || $("#album").val() != ""){
 			alert("Désolé, mais la recherche par album ou titre requiert l'artiste");
 		}
-	}	
+	}
 }
 
 function updateUrl(){
 	var url = "/artist/"+encodeMyUrl($("#q").val());
-		
+
 	if ($("#q").val() != ""){
 		if ($("#title").val() != ""){
 			$("#albums_youtube_query").attr("placeholder",$("#q").val() + " " +$("#title").val());
@@ -330,12 +334,15 @@ function updateUrl(){
 			if ($("#album").val() != ""){
 				url = url +"/"+encodeMyUrl($("#album").val());
 			}
-		}		
+		}
 
 		if (sVideoIdOld != ''){
 			url = url+"?play="+sVideoIdOld;
+            if (sVideoTitleOld != ''){
+                url = url+"&title="+sVideoTitleOld;
+            }
 		}
-		
+
 		window.history.pushState($("#q").val(), $("#q").val(), url);
 	}
 }
@@ -343,18 +350,18 @@ function updateUrl(){
 //Affiche l album
 function showAlbum(){
 	$("#album_detail").show();
-	$("#block_albums").hide();	
+	$("#block_albums").hide();
 }
 
 
 //Retour album
 function backAlbum(){
 	$("#album_detail").hide();
-	$("#block_albums").show();	
+	$("#block_albums").show();
 }
 
 
-/* Lance la recherche */	
+/* Lance la recherche */
 function goAjax(){
 	if ($("#q").val() != ''){
 		var url = "/ajax/artist/"+encodeMyUrl($("#q").val());
@@ -370,20 +377,20 @@ function goAjax(){
 				url = url +"/"+encodeMyUrl($("#album").val());
 			}
 		}
-				
+
 		$.ajax({
 		  type: "GET",
 		  url: url,
 		  success: function(msg){
 				//alert(msg);
 				eval(msg);
-		  }	  
+		  }
 		});
 	}else{
 		//alert ("Nom de l'artiste obligatoire");
 	}
-	
-	
+
+
 	//Si au bout de 10 secondes la requete ne s est pas termine, alors on relance
 	/*
 	setTimeout(function(){
@@ -397,17 +404,17 @@ function goAjax(){
 /* Verifie si la video est sous licence et envoie donc liframe de deblocage */
 function checkYoutube(sVideoId, sVideoTitle){
 	var sUrl = "/ajax/checkyoutube";
-	
+
 	$.ajax({
 	  type: "GET",
 	  url: sUrl,
 	  data: "video_id="+sVideoId,
 	  success: function(msg){
 			//alert(msg);
-			if(msg=="true"){							
-				loadVideo(sVideoId, sVideoTitle);							
-			}						
-	  }	  
+			if(msg=="true"){
+				loadVideo(sVideoId, sVideoTitle);
+			}
+	  }
 	});
 }
 
@@ -425,7 +432,7 @@ function checkKey(e) {
 			$("#allpage").css("display","");
 			$("body").css("background","#fff");
 			break;
-		
+
 		case 37:
 		   // left arrow
 		   if ($("#prevtral").css("visibility") != "hidden"){
@@ -441,7 +448,7 @@ function checkKey(e) {
 				pagination(-5,'trya');
 			}
 			break;
-	
+
 		case 39:
 			// right arrow
 			if ($("#nexttral").css("visibility") != "hidden"){
@@ -469,7 +476,7 @@ function searchFor(sDivId,oInput){
 	  data: "div_id="+sDivId+"&keywords="+oInput.value,
 	  success: function(msg){
 		eval(msg);
-	  }	  
+	  }
 	});
 }
 
@@ -478,25 +485,27 @@ function imageRefresh(img, timeout) {
     setTimeout(function() {
      var d = new Date;
      var http = img.src;
-     if (http.indexOf("&d=") != -1) { http = http.split("&d=")[0]; } 
+     if (http.indexOf("&d=") != -1) { http = http.split("&d=")[0]; }
 
      img.src = http + '&d=' + d.getTime();
     }, timeout);
   }
-  
+
 //Charge les images en differe
 function loadImages() {
     var imgs = document.getElementsByTagName('img');
     for (var i = 0; i < imgs.length; i++) {
-        if (imgs[i].getAttribute('data-src')) {
+        if (imgs[i].getAttribute('data-src') && imgs[i].style.display != 'none') {
             imgs[i].setAttribute('src', imgs[i].getAttribute('data-src'));
 			imgs[i].removeAttribute('data-src');
         }
     }
 }
- 
-if (window.addEventListener) { window.addEventListener("load", loadImages, false); }
-else if (window.attachEvent) { window.attachEvent("onload", loadImages); }
+
+window.setInterval(function(){
+    loadImages();
+},1000);
+
 
 //Gestion des cookies
 function createCookie(name,value,days) {
@@ -529,11 +538,14 @@ function addShareBtn(){
 	shareLink("#btntwitter",'https://twitter.com/share?url=',encodeURIComponent($("#btn_url").val()),'Venez+voir+'+encodeURIComponent($("#btn_artist").val()));
 }
 
-function shareLink(oIcon, url_network, url,text){	
+function shareLink(oIcon, url_network, url,text){
 	if (sVideoIdOld != ''){
 		url = url+"?play="+sVideoIdOld;
+        if (sVideoTitleOld != ''){
+            url = url+"&title="+sVideoTitleOld;
+        }
 	}
-	$(oIcon).attr("href",url_network+url+"&text="+text);	
+	$(oIcon).attr("href",url_network+url+"&text="+text);
 }
 
 function lookForArtist(sArtist){
@@ -541,6 +553,7 @@ function lookForArtist(sArtist){
 	$('#album').val('');
 	$('#q').val(sArtist);
 	sVideoIdOld='';
+    sVideoTitleOld='';
 	searchX();
 }
 
@@ -550,4 +563,18 @@ function lookForAlbum(sArtist, sAlbum){
 	$('#q').val(sArtist);
 	$('#album').val(sAlbum);
 	searchX();
+}
+
+function getQueryParams(qs) {
+    qs = qs.split('+').join(' ');
+
+    var params = {},
+        tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
 }

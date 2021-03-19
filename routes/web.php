@@ -40,9 +40,10 @@ if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],config("a
 	Route::get('/artist', 'SearchController@index');
 	Route::get('/artist/{artist_name}', 'SearchController@artist');
 	Route::get('/artist/{artist_name}/{album_name}', 'SearchController@artist_album');
-	Route::get('/artist/{artist_name}/{album_name}/{title_name}', 'SearchController@artist_album_title');	
-	
+	Route::get('/artist/{artist_name}/{album_name}/{title_name}', 'SearchController@artist_album_title');
+
 	Route::get('/picture/{mbid}', 'SearchController@picture');
+    Route::get('/sonos', 'SearchController@sonos');
 }else{
 	if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/busy"){
 		header("location: /busy");
@@ -50,7 +51,7 @@ if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],config("a
 	}
 }
 //On filtre par permission
-Route::group(['middleware' => ['auth','permission:user-edit']], function () {	
+Route::group(['middleware' => ['auth','permission:user-edit']], function () {
 		Route::resource('users', 'UserController');
 });
 

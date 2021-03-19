@@ -17,6 +17,8 @@ return [
 	"MUSESCORE_API"=>env("MUSESCORE_API"),
 	"MUSESCORE_SECRET"=>env("MUSESCORE_SECRET"),
 	"DOWNLOAD_AVAILABLE"=>env("DOWNLOAD_AVAILABLE",false),
+    "SONOS_AVAILABLE"=>env("SONOS_AVAILABLE",false),
+    "SONOS_URL"=>env("SONOS_URL","https://yoursite/streamsonos"),
 	"maintenance_password"=>env("maintenance_password","admin"),
 	"CACHE"=>env("CACHE",false),
 
@@ -229,7 +231,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 		'HTMLMin' => HTMLMin\HTMLMin\Facades\HTMLMin::class,
-		
+
 		'Helpers'	=> App\Providers\HelperServiceProvider::class,
     ],
 
