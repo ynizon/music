@@ -4,6 +4,7 @@ return [
 
 # Google credentials and configuration
 	"ONLY_IP" => explode(",",env("ONLY_IP")),
+    "ONLY_SONOS_IP" => explode(",",env("ONLY_SONOS_IP")),
 	"LASTFM_API"=>env("LASTFM_API"),//Non utilisee
 	"LASTFM_SECRET"=>env("LASTFM_SECRET"),//Non utilisee
 	"DELAY_CACHE"=>300,

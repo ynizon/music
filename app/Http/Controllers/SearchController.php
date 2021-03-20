@@ -14,6 +14,7 @@ use App\Album;
 use App\Repositories\ArtistRepository;
 use App\Repositories\AlbumRepository;
 use App\Repositories\TitleRepository;
+use \Illuminate\Http\Response;
 
 class SearchController extends BaseController
 {
@@ -141,8 +142,18 @@ class SearchController extends BaseController
 		echo file_get_contents($url);
 	}
 
+    public function checkipsonos(Request $request){
+        if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],config("app.ONLY_SONOS_IP"))){
+            return view("ajax/checkipsonos");
+        }
+    }
+
     public function sonos(Request $request){
-        $url = config("app.SONOS_URL");
-        header("location: ".$url."?id=".$request->input("id") ."&name=".$request->input("name"));
+        if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],config("app.ONLY_SONOS_IP"))){
+            $url = config("app.SONOS_URL");
+            header("location: ".$url."?id=".$request->input("id") ."&name=".$request->input("name"));
+        }else{
+            return new Response('Forbidden', 403);
+        }
     }
 }

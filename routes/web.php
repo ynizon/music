@@ -44,6 +44,7 @@ if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],config("a
 
 	Route::get('/picture/{mbid}', 'SearchController@picture');
     Route::get('/sonos', 'SearchController@sonos');
+    Route::get('/checkipsonos', 'SearchController@checkipsonos');
 }else{
 	if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/busy"){
 		header("location: /busy");

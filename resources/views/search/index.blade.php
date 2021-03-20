@@ -123,15 +123,20 @@ if (isset($title)){
 									?>
 										<a target="_blank" class="cursor" style="display:none" href='#' id="download" >Télécharger le MP3</a>
 									<?php
-                                        if (config("app.SONOS_AVAILABLE")){
-                                            echo " - ";
-                                        }
 									}
-                                        if (config("app.SONOS_AVAILABLE")){
+
+                                    if (config("app.SONOS_AVAILABLE")){
                                         ?>
-                                        <a target="_blank" class="cursor" style="display:none" href='#' id="sonos" >Envoyer au SONOS</a>
+                                        <div id="sonos_bloc" style="display:none" >
+                                            <?php
+                                            if (config("app.DOWNLOAD_AVAILABLE")){
+                                                echo " - ";
+                                            }
+                                            ?>
+                                            <a target="_blank" class="cursor" href='#' id="sonos" >Envoyer au SONOS</a>
+                                        </div>
                                         <?php
-                                        }
+                                    }
 									?>
 									<span id="link_amazon"></span>
 								</div>
