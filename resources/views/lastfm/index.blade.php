@@ -4,6 +4,9 @@
 <?php
 $user = Auth::user();
 ?>
+<style>
+.menu_q{display:none;}
+</style>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
