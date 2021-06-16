@@ -497,9 +497,12 @@ abstract class HelperServiceProvider extends ServiceProvider
 
 	public static function getYoutubeData($url){
 		//Check if restrict ip
-		$tabIp = config("app.ONLY_IP");
-		if (count($tabIp)>0){
-			if (!in_array($_SERVER['REMOTE_ADDR'],$tabIp) and $_SERVER["REQUEST_URI"] != "/busy"){
+		$allowedIps = config("app.ONLY_IP");
+		if (isset($_SESSION["addip"])){
+			$allowedIps = array_merge([$_SESSION['addip']],$allowedIps);
+		}
+		if (count($allowedIps)>0){
+			if (!in_array($_SERVER['REMOTE_ADDR'],$allowedIps) and $_SERVER["REQUEST_URI"] != "/busy"){
 				return redirect('/busy');
 			}
 		}

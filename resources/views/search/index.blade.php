@@ -178,7 +178,7 @@ if (isset($title)){
 										<tr>
 											<th colspan="2">
 												<h2>Vidéos des albums <span class="inv">de <?php echo $artist->name;?></span></h2>
-												<input title="Vous pouvez faire votre propre recherche ici" type="text" id="albums_youtube_query" placeholder="<?php echo $artist->name;?> album" class="myquery" onkeypress="if(event.keyCode == 13){searchFor('albums_youtube',this);}">
+												<input title="Vous pouvez faire votre propre recherche ici" type="text" id="albums_youtube_query" value="<?php echo $artist->name;?> album" class="myquery" onkeypress="if(event.keyCode == 13){searchFor('albums_youtube',this);}">
 											</th>
 										</tr>
 									</thead>
@@ -205,7 +205,7 @@ if (isset($title)){
 										<tr>
 											<th colspan="2">
 												<h2>Vidéos des concerts <span class="inv">de <?php echo $artist->name;?></span></h2>
-												<input title="Vous pouvez faire votre propre recherche ici" type="text" id="lives_youtube_query" placeholder="<?php echo $artist->name;?> live" class="myquery" onkeypress="if(event.keyCode == 13){searchFor('lives_youtube',this);}">
+												<input title="Vous pouvez faire votre propre recherche ici" type="text" id="lives_youtube_query" value="<?php echo $artist->name;?> live" class="myquery" onkeypress="if(event.keyCode == 13){searchFor('lives_youtube',this);}">
 											</th>
 										</tr>
 									</thead>

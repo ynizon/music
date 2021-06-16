@@ -35,8 +35,8 @@ if (isset($artist_name)){
 	?>
 	$("#menu_name").html(<?php echo json_encode(HelperServiceProvider::replaceUpperChar($artist_name));?>);
 	$("#title_seo").html(<?php echo json_encode($artist_name);?>);
-	$("#albums_youtube_query").attr("placeholder",<?php echo json_encode($artist_name." album");?>);
-	$("#lives_youtube_query").attr("placeholder",<?php echo json_encode($artist_name." live");?>);
+	$("#albums_youtube_query").attr("value",<?php echo json_encode($artist_name." album");?>);
+	$("#lives_youtube_query").attr("value",<?php echo json_encode($artist_name." live");?>);
 	$("#btn_url").val(<?php echo json_encode(config("app.url")."/artist/".HelperServiceProvider::replaceUpperChar($artist_name));?>);
 	$("#btn_artist").val(<?php echo json_encode(HelperServiceProvider::replaceUpperChar($artist_name));?>);
 	addShareBtn();
