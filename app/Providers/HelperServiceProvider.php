@@ -11,8 +11,14 @@ abstract class HelperServiceProvider extends ServiceProvider
 		$pic = "";
 		try{
 			$url = "https://webservice.fanart.tv/v3/music/".$lastfm_mbid."&?api_key=06f56465de874e4c75a2e9f0cc284fa3&format=json";
-			//echo $url;
-			$json = file_get_contents($url);
+			$options = [
+				"ssl" => [
+					"verify_peer"=>false,
+					"verify_peer_name"=>false
+				]
+			];
+
+			$json = file_get_contents($url, false, stream_context_create($options));
 			if ($json != ""){
 				$json = json_decode($json,true);
 				if (isset($json["artistthumb"])){
