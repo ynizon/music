@@ -137,9 +137,15 @@ class SearchController extends BaseController
 	}
 
 	public function picture($mbid, Request $request){
-		header("Content-type: image/png");
+		$arrContextOptions=array(
+			"ssl"=>array(
+				"verify_peer"=>false,
+				"verify_peer_name"=>false,
+			),
+		);  
+		header("Content-type: image/png");		
 		$url = HelperServiceProvider::getPic($mbid,$request->input('default'));
-		echo file_get_contents($url);
+		echo file_get_contents($url, false, stream_context_create($arrContextOptions));
 	}
 
     public function checkipsonos(Request $request){
