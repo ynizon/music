@@ -9,7 +9,7 @@ use App\Repositories\SiteRepository;
 use Session;
 use Illuminate\Http\Request;
 use Auth;
-use App\User;
+use App\Models\User;
 use Mail;
 use DB;
 

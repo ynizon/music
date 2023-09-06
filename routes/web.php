@@ -1,17 +1,18 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
 |
 */
-
-session_start();
 
 Route::get('/maintenance', 'MaintenanceController@index');
 Route::get('/maintenance/admin', 'MaintenanceController@admin');
@@ -31,7 +32,7 @@ if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedI
 	Route::get('/', 'HomeController@index');
 	Route::get('/sitemap.xml', 'HomeController@sitemap');
 	Route::get('/contact', 'HomeController@contact');
-	Route::get('/faq', 'HomeController@faq');	
+	Route::get('/faq', 'HomeController@faq');
 	Route::get('/download', 'HomeController@download');
 
 	Route::get('/search', 'SearchController@index');
@@ -62,8 +63,6 @@ Route::group(['middleware' => ['auth','permission:user-edit']], function () {
 		Route::resource('users', 'UserController');
 });
 
-
-
-Auth::routes();
-
 Route::get('/home', 'HomeController@index')->name('home');
+
+require __DIR__.'/auth.php';

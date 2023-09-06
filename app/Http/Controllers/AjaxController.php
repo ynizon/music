@@ -9,9 +9,9 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Providers\HelperServiceProvider;
 use View;
 
-use App\Artist;
-use App\Album;
-use App\Title;
+use App\Models\Artist;
+use App\Models\Album;
+use App\Models\Title;
 use App\Repositories\ArtistRepository;
 use App\Repositories\AlbumRepository;
 use App\Repositories\TitleRepository;

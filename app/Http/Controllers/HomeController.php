@@ -10,13 +10,13 @@ use App\Repositories\TitleRepository;
 use App\Repositories\AlbumRepository;
 use Barryvanveen\Lastfm\Lastfm;
 use GuzzleHttp\Client;
- 
+
 class HomeController extends Controller
 {
 	protected $artistRepository;
 	protected $albumRepository;
 	protected $titleRepository;
-	
+
     /**
      * Create a new controller instance.
      *
@@ -38,7 +38,7 @@ class HomeController extends Controller
     public function index()
     {
 		$dir = dirname(__FILE__)."/../../../storage";
-		
+
 		$sArtistes = "";
 		$sMaj = "";
 		$interval = 0;
@@ -49,48 +49,48 @@ class HomeController extends Controller
 			$interval = date_diff($datetime2,$datetime1);
 			$interval = $interval->format('%a');
 		}
-		
+
 		//Recupere le top artist
 		$sFile = $dir."/home.txt";
 		if ($sMaj == "" or $interval > 3){
 			file_put_contents($dir."/maj.txt",date("Y-m-d"));
-			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".config("lastfm.api_key");			
-			file_put_contents($sFile,file_get_contents($sUrl));
+			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".config("lastfm.api_key");
+            file_put_contents($sFile,file_get_contents($sUrl));
 		}
-		$artistes = json_decode(file_get_contents($sFile));		
+		$artistes = json_decode(file_get_contents($sFile));
 
 		$preferences = array();
 		$lastfm_login = Cookie::get('lastfm_login');
 		if ($lastfm_login != ""){
-			$lastfm = new Lastfm(new Client(), config("lastfm.api_key"));    
+			$lastfm = new Lastfm(new Client(), config("lastfm.api_key"));
 			$preferences = $lastfm->userTopArtists($lastfm_login)->get();
-		}		
-		
+		}
+
 		//Et si on en trouve pas alors on prend les artistes smiliaires aux dernieres recherches
 		$artist_name = "";
 		if ("" != Cookie::get('artist')){
 			$artist_name = Cookie::get('artist');
 		}
-		
+
 		$similar = array();
-		if ($artist_name != ""){	
+		if ($artist_name != ""){
 			try{
-				$oArtist = $this->artistRepository->getByName($artist_name);			
-				$similar = json_decode($oArtist->similar);			
+				$oArtist = $this->artistRepository->getByName($artist_name);
+				$similar = json_decode($oArtist->similar);
 			}catch(\Exception $e){
 				//Nothing
 			}
 		}
-		
+
 		//On reenregistre le login lastfm
 		if ("" != Cookie::get('lastfm_login')){
 			$lastfm_login = Cookie::get('lastfm_login');
 		}
 		Cookie::queue("lastfm_login", $lastfm_login, 1314000);
-		
+
         return view('page/welcome', compact('artistes','preferences','similar','artist_name'));
     }
-	
+
 	public function lastfm_login(Request $request){
 		$lastfm_login = "";
 		if ("" != Cookie::get('lastfm_login')){
@@ -100,17 +100,17 @@ class HomeController extends Controller
 		if ($request->input("lastfm_login") != ""){
 			$lastfm_login = $request->input("lastfm_login");
 			Cookie::queue("lastfm_login", $lastfm_login, 1314000);
-			
+
 			if (config("app.ALLOW_OTHER_IPS")){
 				$_SESSION["addip"]=$_SERVER['REMOTE_ADDR'];
 			}
-			
+
 			return redirect('/');
 		}else{
 			return view('lastfm/index', compact('lastfm_login'));
-		}		
+		}
 	}
-	
+
 	/**
      * Busy page
      *
@@ -119,7 +119,7 @@ class HomeController extends Controller
     public function busy()
     {
 		$dir = dirname(__FILE__)."/../../../storage";
-		
+
 		$sArtistes = "";
 		$sMaj = "";
 		$interval = 0;
@@ -130,83 +130,83 @@ class HomeController extends Controller
 			$interval = date_diff($datetime2,$datetime1);
 			$interval = $interval->format('%a');
 		}
-		
+
 		//Recupere le top artist
 		$sFile = $dir."/home.txt";
-		if ($sMaj == "" or $interval > 3){
+		if ($sMaj == "" or $interval > 3 or !file_exists($sFile)){
 			file_put_contents($dir."/maj.txt",date("Y-m-d"));
-			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".config("lastfm.api_key");			
-			file_put_contents($sFile,file_get_contents($sUrl));
+			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".config("lastfm.api_key");
+            file_put_contents($sFile,file_get_contents($sUrl));
 		}
-		$artistes = json_decode(file_get_contents($sFile));		
+		$artistes = json_decode(file_get_contents($sFile));
 
 		$preferences = array();
 		$lastfm_login = Cookie::get('lastfm_login');
 		if ($lastfm_login != ""){
-			$lastfm = new Lastfm(new Client(), config("lastfm.api_key"));    
+			$lastfm = new Lastfm(new Client(), config("lastfm.api_key"));
 			$preferences = $lastfm->userTopArtists($lastfm_login)->get();
-		}		
-		
+		}
+
 		//Et si on en trouve pas alors on prend les artistes smiliaires aux dernieres recherches
 		$artist_name = "";
 		if ("" != Cookie::get('artist')){
 			$artist_name = Cookie::get('artist');
 		}
-		
+
 		$similar = array();
-		if ($artist_name != ""){	
+		if ($artist_name != ""){
 			try{
-				$oArtist = $this->artistRepository->getByName($artist_name);			
-				$similar = json_decode($oArtist->similar);			
+				$oArtist = $this->artistRepository->getByName($artist_name);
+				$similar = json_decode($oArtist->similar);
 			}catch(\Exception $e){
 				//Nothing
 			}
 		}
-		
+
 		//On reenregistre le login lastfm
 		if ("" != Cookie::get('lastfm_login')){
 			$lastfm_login = Cookie::get('lastfm_login');
 		}
 		Cookie::queue("lastfm_login", $lastfm_login, 1314000);
-		
+
         return view('page/busy', compact('artistes','preferences','similar','artist_name'));
     }
-	
+
 	public function faq(Request $request){
 		return view('page/faq');
 	}
-	
+
 	public function contact(Request $request){
 		return view('page/contact');
 	}
-	
+
 	public function sitemap(Request $request){
 		set_time_limit(0);
-		
+
 		$dir = dirname(__FILE__)."/../../../storage";
-		
-		$tabMaj = array();		
-		
+
+		$tabMaj = array();
+
 		$sFile = $dir."/sitemap_maj.txt";
 		$tabMaj["artist"] = date("Y-m-d");
 		$tabMaj["album"] = date("Y-m-d");
 		$tabMaj["title"] = date("Y-m-d");
-		
+
 		$interval = 0;
 		$datetime1 = date_create(date("Y-m-d"));
-		
+
 		$bNew = true;
 		if (file_exists($sFile)){
 			$bNew = false;
-			$tabMaj = json_decode(file_get_contents($sFile),true);			
+			$tabMaj = json_decode(file_get_contents($sFile),true);
 		}
-				
-		foreach ($tabMaj as $field=>$sDate){		
+
+		foreach ($tabMaj as $field=>$sDate){
 			$datetime2 = date_create($sDate);
 			$interval = date_diff($datetime2,$datetime1);
 			$interval = $interval->format('%a');
 
-			if ($bNew or $interval > 3){			
+			if ($bNew or $interval > 3){
 				switch ($field){
 					case "artist":
 						$infos = $this->artistRepository->getAll();
@@ -215,11 +215,11 @@ class HomeController extends Controller
 						$infos = $this->albumRepository->getAll();
 						break;
 					case "title":
-						$infos = $this->titleRepository->getAll();						
+						$infos = $this->titleRepository->getAll();
 						break;
 				}
 				$sitemap_url = config("app.sitemap_url")."/sitemap-".$field.".xml";
-				
+
 				$urls = array();
 				foreach ($infos as $info){
 					switch ($field){
@@ -235,22 +235,22 @@ class HomeController extends Controller
 					}
 					$urls[$url] = str_replace(" ","T",$info->updated_at)."+00:00";
 				}
-				
+
 				$content = view('page/sitemap-infos',compact("urls","sitemap_url"));
 				file_put_contents($dir."/../public/sitemap-".$field.".xml",$content);
 			}
 		}
-		
+
 		//On ecrit la date du jour pour etre sur que c est MAJ
 		foreach ($tabMaj as $field=>$sDate){
 			$tabMaj[$field] = date("Y-m-d");
 		}
 		file_put_contents($sFile,json_encode($tabMaj));
-		
+
 		$content = view('page/sitemap');
 		return Response::make($content, '200')->header('Content-Type', 'text/xml');
 	}
-	
+
 	public function download(Request $request){
 		$name = $request->input('name');
 		$id = $request->input("id");
@@ -262,8 +262,8 @@ class HomeController extends Controller
 				unlink($dir.'/'.$file);
 			}
 		}
-		
-		$cmd = 'youtube-dl --prefer-ffmpeg --ffmpeg-location /opt/ffmpeg/ffmpeg --output "'.$dir.'/%(title)s.%(ext)s" --extract-audio --audio-format mp3 '.$url;
+
+		$cmd = 'yt-dlp_linux --prefer-ffmpeg --ffmpeg-location /opt/ffmpeg/ffmpeg --output "'.$dir.'/%(title)s.%(ext)s" --extract-audio --audio-format mp3 '.$url;
 		shell_exec($cmd);
 
 		$files = scandir($dir);
@@ -272,5 +272,6 @@ class HomeController extends Controller
 				return response()->download($dir.'/'.$file);
 			}
 		}
+        return "NE FONCTIONNE PAS SUR CET ORDI: ".$cmd ;
 	}
 }

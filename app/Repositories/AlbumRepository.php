@@ -1,8 +1,8 @@
-<?php 
+<?php
 
 namespace App\Repositories;
 
-use App\Album;
+use App\Models\Album;
 use Google\Cloud\Datastore\DatastoreClient;
 
 class AlbumRepository {
@@ -23,22 +23,22 @@ class AlbumRepository {
 		$album = $this->datastore->lookup($key);
 		return $album;
 	}
-	
+
 	public function getAll(){
 		$query = $this->datastore->query()->kind($this->table);
 		$artists = $this->datastore->runQuery($query);
 		return $artists;
 	}
-	
-	public function getByName($artist_name, $name){		
+
+	public function getByName($artist_name, $name){
 		$album = null;
 		$query = $this->datastore->query()->kind($this->table)->filter("artist","=",strtolower($artist_name))->filter("name","=",strtolower($name));
 		$albums = $this->datastore->runQuery($query);
-		
+
 		foreach ($albums as $entity){
 			$fields = $entity->get();
 			$album = new Album();
-			
+
 			foreach ($fields as $field=>$value){
 				$album->$field = $value;
 			}
@@ -47,29 +47,29 @@ class AlbumRepository {
 
 		return $album;
 	}
-	
+
 	public function store(Array $inputs)
 	{
-		$album = new $this->model;		
+		$album = new $this->model;
 		$this->save($album, $inputs);
 
 		return $album;
 	}
-	
+
 	public function save($album, Array $inputs)
 	{
 		if (isset($inputs["name"])){
 			$this->model->name = $inputs["name"];
-		}		
-        
-		$album->save();		
-	}	
-	
+		}
+
+		$album->save();
+	}
+
 	public function update($id, Array $inputs)
 	{
 		$this->save($this->getById($id), $inputs);
-	}	
-	
+	}
+
 	public function delete($id){
 		$datastore->delete($this->table,$id);
 	}
