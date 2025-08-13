@@ -91,6 +91,27 @@ class HomeController extends Controller
         return view('page/welcome', compact('artistes','preferences','similar','artist_name'));
     }
 
+    public function admin(Request $request){
+        $ips = [];
+        $error = '';
+        if (file_exists(storage_path("ips.txt"))){
+            $ips = json_decode(file_get_contents(storage_path("ips.txt")), true);
+        }
+        if ($request->input("password") != ''){
+            if ($request->input("password") == env("ADMIN_PASSWORD")){
+                if (!in_array($request->input("ip"), $ips)){
+                    $ips[] = $request->input("ip");
+                }
+                file_put_contents(storage_path("ips.txt"), json_encode($ips));
+            } else {
+                $error = "Mot de passe faux";
+            }
+        } else {
+            $error = "Mot de passe requis";
+        }
+        return view('admin/index', compact('ips', 'error'));
+    }
+
 	public function lastfm_login(Request $request){
 		$lastfm_login = "";
 		if ("" != Cookie::get('lastfm_login')){

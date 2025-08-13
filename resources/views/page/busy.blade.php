@@ -16,7 +16,8 @@
 		</style>
 		<div class="banner banner<?php echo rand(1,3);?>">
 			<div class="span_1_of_1">
-				<h2>Désolé, ce site est actuellement surchargé<br/>merci de monter le votre, <a href='https://github.com/ynizon/music'>grâce aux sources.</a></h2>
+				<h2>Désolé, ce site est actuellement surchargé<br/>merci de monter le votre, <a href='https://github
+				.com/ynizon/music'>grâce aux sources,<br/> ou <a href="/admin">d'ajouter votre IP.</a></h2>
 				<div class="search">
 				  <ul class="nav1">
 					<li id="search">
@@ -149,9 +150,11 @@
 									<div class="bloc_home">
 										<?php 
 										$pic = $oArtist->image[2]->$sTxt;
-										if ($oArtist->mbid != ""){
-											$pic = Helpers::getPic($oArtist->mbid,$pic);
-										}
+										if (isset($oArtist->mbid)) {
+                                            if ($oArtist->mbid != "") {
+                                                $pic = Helpers::getPic($oArtist->mbid, $pic);
+                                            }
+                                        }
 										?>
 										<img style="max-height:174px;margin:auto;" src="<?php echo $pic?>" class="img-responsive" alt="<?php echo str_replace('"','\"',$oArtist->name);?>" />
 									</div>

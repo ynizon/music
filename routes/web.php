@@ -24,10 +24,16 @@ Route::post('/lastfm_login', 'HomeController@lastfm_login');
 
 //echo var_dump($_SESSION);exit();
 $allowedIps = config("app.ONLY_IP");
+if (file_exists(storage_path("ips.txt"))){
+    $ips = json_decode(file_get_contents(storage_path("ips.txt")), true);
+    $allowedIps = array_merge($ips,$allowedIps);
+}
 if (isset($_SESSION["addip"])){
 	$allowedIps = array_merge([$_SESSION['addip']],$allowedIps);
 }
 
+Route::get('/admin', 'HomeController@admin');
+Route::post('/admin', 'HomeController@admin');
 if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedIps)){
 	Route::get('/', 'HomeController@index');
 	Route::get('/sitemap.xml', 'HomeController@sitemap');
@@ -53,7 +59,8 @@ if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedI
     Route::get('/sonos', 'SearchController@sonos');
     Route::get('/checkipsonos', 'SearchController@checkipsonos');
 }else{
-	if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/busy" && $_SERVER['REQUEST_URI'] != "/lastfm_login"){
+	if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/admin" && $_SERVER['REQUEST_URI'] != "/busy"
+        && $_SERVER['REQUEST_URI'] != "/lastfm_login"){
 		header("location: /busy");
 		exit();
 	}
