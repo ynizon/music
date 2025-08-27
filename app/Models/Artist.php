@@ -2,26 +2,16 @@
 
 namespace App\Models;
 
-use Google\Cloud\Datastore\Entity;
-use App\Datastoremodel;
+use Aerni\Spotify\Facades\SpotifyFacade as Spotify;
 use App\Providers\HelperServiceProvider;
 
 class Artist extends DSModel
 {
-	
-    //public $timestamps = true;   
-   
 	public $table = 'Artist';
 	
-	public function __construct(){
-	
-	}
-	
 	public function refreshData(){
-		
 		$bRefresh = false;
 		$bSave = false;
-//		echo var_dump($this);exit();
 		
 		//Detecter si les infos sont obsoletes		
 		if (isset($this->updated_at)){
@@ -36,9 +26,19 @@ class Artist extends DSModel
 		}else{
 			$bRefresh = true;
 		}
-		
+
 		if ($bRefresh or !isset($this->biography)){
-			$sBio = file_get_contents("http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=".urlencode($this->name)."&lang=fr&format=json&api_key=".config("lastfm.api_key"));
+            $items = Spotify::searchItems($this->name, 'artist')->get();
+            if (count($items)>0) {
+                $spotifyArtistId = $items['artists']['items'][0]['id'];
+                $albums = Spotify::artistAlbums($spotifyArtistId)->get();
+                foreach ($albums['items'] as $album) {
+                    $albumsSpotify[strtolower($album['name'])] = $album['external_urls']['spotify'];
+                }
+            }
+            $this->spotify_albums = $albumsSpotify;
+
+            $sBio = file_get_contents("http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=".urlencode($this->name)."&lang=fr&format=json&api_key=".config("lastfm.api_key"));
 			
 			$sBioFR = "";
 			if (trim($sBio) != ""){
@@ -73,6 +73,7 @@ class Artist extends DSModel
 				$bSave = true;
 			}
 		}
+
 		if ($bRefresh or !isset($artist->youtube_full_album)){
 			$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($this->name." full album")."&maxResults=50&key=".config("app.YOUTUBE_API");
 			$sBio = HelperServiceProvider::getYoutubeData($url);
@@ -81,6 +82,7 @@ class Artist extends DSModel
 				$bSave = true;
 			}
 		}
+
 		if ($bRefresh or !isset($artist->youtube_live)){
 			$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=".urlencode($this->name." live")."&maxResults=50&key=".config("app.YOUTUBE_API");
 			$sBio = HelperServiceProvider::getYoutubeData($url);

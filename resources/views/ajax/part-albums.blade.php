@@ -11,7 +11,6 @@ if (isset($tab->topalbums->album)){
 		$tabAlbums = array($tab->topalbums->album);
 	}
 }
-
 $bAlbums = false;
 
 if ($tabAlbums[0] != NULL){
@@ -35,6 +34,12 @@ if ($tabAlbums[0] != NULL){
 					<a class="cursor" onclick="lookForAlbum('<?php echo str_replace("'","\\'",$oAlbum->artist->name);?>','<?php echo str_replace("'","\\'",$oAlbum->name);?>');">
 						<?php echo $oAlbum->name;?>
 					</a>
+					@foreach($artist->spotify_albums as $spotifyName => $spotifyHref)
+						@if ($spotifyName == strtolower($oAlbum->name))
+							<br/>
+							<a href="{{$spotifyHref}}" target="_blank"><i class="fa fa-spotify"></i></a>
+						@endif
+					@endforeach
 					<?php
 					/*
 					if (isset($tabAlbumsAmazon[strtolower($oAlbum->name)])){

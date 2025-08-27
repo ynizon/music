@@ -61,7 +61,7 @@ if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedI
 }else{
 	if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/admin" && $_SERVER['REQUEST_URI'] != "/busy"
         && $_SERVER['REQUEST_URI'] != "/lastfm_login"){
-		header("location: /busy");
+        header("location: /busy");
 		exit();
 	}
 }

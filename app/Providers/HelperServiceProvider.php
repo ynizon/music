@@ -504,12 +504,17 @@ abstract class HelperServiceProvider extends ServiceProvider
 	public static function getYoutubeData($url){
 		//Check if restrict ip
 		$allowedIps = config("app.ONLY_IP");
+        if (file_exists(storage_path("ips.txt"))){
+            $ips = json_decode(file_get_contents(storage_path("ips.txt")), true);
+            $allowedIps = array_merge($ips,$allowedIps);
+        }
 		if (isset($_SESSION["addip"])){
 			$allowedIps = array_merge([$_SESSION['addip']],$allowedIps);
 		}
+
 		if (count($allowedIps)>0){
 			if (!in_array($_SERVER['REMOTE_ADDR'],$allowedIps) and $_SERVER["REQUEST_URI"] != "/busy"){
-				return redirect('/busy');
+                return redirect('/busy');
 			}
 		}
 
