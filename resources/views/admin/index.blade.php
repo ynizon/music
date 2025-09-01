@@ -22,7 +22,7 @@ $user = Auth::user();
 							</p>
 							<form method="post" action="/admin"><br/>
 								@csrf
-								<input type="text" name="password" required value="" placeholder="Password"
+								<input type="password" name="password" required value="" placeholder="Password"
 									   style="width:200px"/>&nbsp;&nbsp;&nbsp;
 								<input type="text" name="ip" required value="<?php echo $_SERVER['REMOTE_ADDR'];?>"
 									   placeholder="Public IP"
