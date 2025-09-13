@@ -7,8 +7,6 @@
 
     RewriteEngine On
 
-	RewriteCond %{SERVER_PORT} !^443$
-	RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -23,7 +21,6 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
-	
-	Header set X-Content-Type-Options nosniff 
+
 </IfModule>
 

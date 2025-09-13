@@ -3,52 +3,20 @@
 namespace App\Repositories;
 
 use App\Models\Artist;
-use Google\Cloud\Datastore\DatastoreClient;
-use Cookie;
+use Illuminate\Support\Str;
 
 class ArtistRepository {
 
-    //
-	protected $model;
-	protected $datastore;
-	private $table = "Artist";
-
-	public function __construct(Artist $artist)
+	public function __construct()
 	{
-		$this->model = $artist;
-		$this->datastore = new DatastoreClient();
 	}
 
-	public function getById($id){
-		$key = $this->datastore->key($this->table, $this->model->id);
-		$artist = $this->datastore->lookup($key);
-		return $artist;
-	}
-
-	public function getAll(){
-		$query = $this->datastore->query()->kind($this->table);
-		$artists = $this->datastore->runQuery($query);
-		return $artists;
-	}
+    public function getBySlug($slug){
+        return Artist::where("slug","=",$slug)->first();
+    }
 
 	public function getByName($name){
-		Cookie::queue("artist", $name, 1314000);
-		$artist = null;
-
-		$query = $this->datastore->query()->kind($this->table)->filter("name","=",strtolower($name));
-		$artists = $this->datastore->runQuery($query);
-
-		foreach ($artists as $entity){
-			$fields = $entity->get();
-			$artist = new Artist();
-
-			foreach ($fields as $field=>$value){
-				$artist->$field = $value;
-			}
-			$artist->id = $entity->key()->pathEndIdentifier();
-		}
-
-		return $artist;
+		return Artist::where("name","=",strtolower($name))->first();
 	}
 
 	public function store(Array $inputs)

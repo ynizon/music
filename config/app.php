@@ -1,39 +1,36 @@
 <?php
 
-use Illuminate\Support\Facades\Facade;
-use Illuminate\Support\ServiceProvider;
-
 return [
-	# Google credentials and configuration
-	"ONLY_IP" => explode(",",env("ONLY_IP")),
+    # Google credentials and configuration
+    "ONLY_IP" => explode(",",env("ONLY_IP")),
     "ONLY_SONOS_IP" => explode(",",env("ONLY_SONOS_IP")),
-	"LASTFM_API"=>env("LASTFM_API"),//Non utilisee
-	"LASTFM_SECRET"=>env("LASTFM_SECRET"),//Non utilisee
-	"ALLOW_OTHER_IPS"=>env("ALLOW_OTHER_IPS", false),//Non utilisee
-	"DELAY_CACHE"=>300,
-	"ANALYTICS_UA"=>env("ANALYTICS_UA"),
-	"YOUTUBE_API"=>env("YOUTUBE_API"),
-	"FLICKR_API"=>env("FLICKR_API"),
-	'AMAZON_AWS_API_KEY'=> env('AMAZON_AWS_API_KEY'),
-	'AMAZON_AWS_API_SECRET_KEY'=> env('AMAZON_AWS_API_SECRET_KEY'),
-	'AMAZON_ASSOCIATE_TAG'=>env('AMAZON_ASSOCIATE_TAG'),
-	'AMAZON_LANGUAGE'=>env('AMAZON_LANGUAGE','fr'),
-	"MUSESCORE_API"=>env("MUSESCORE_API"),
-	"MUSESCORE_SECRET"=>env("MUSESCORE_SECRET"),
-	"DOWNLOAD_AVAILABLE"=>env("DOWNLOAD_AVAILABLE",false),
+    "LASTFM_API"=>env("LASTFM_API"),//Non utilisee
+    "LASTFM_SECRET"=>env("LASTFM_SECRET"),//Non utilisee
+    "ALLOW_OTHER_IPS"=>env("ALLOW_OTHER_IPS", false),//Non utilisee
+    "DELAY_CACHE"=>300,
+    "ANALYTICS_UA"=>env("ANALYTICS_UA"),
+    "YOUTUBE_API"=>env("YOUTUBE_API"),
+    "FLICKR_API"=>env("FLICKR_API"),
+    'AMAZON_AWS_API_KEY'=> env('AMAZON_AWS_API_KEY'),
+    'AMAZON_AWS_API_SECRET_KEY'=> env('AMAZON_AWS_API_SECRET_KEY'),
+    'AMAZON_ASSOCIATE_TAG'=>env('AMAZON_ASSOCIATE_TAG'),
+    'AMAZON_LANGUAGE'=>env('AMAZON_LANGUAGE','fr'),
+    "MUSESCORE_API"=>env("MUSESCORE_API"),
+    "MUSESCORE_SECRET"=>env("MUSESCORE_SECRET"),
+    "DOWNLOAD_AVAILABLE"=>env("DOWNLOAD_AVAILABLE",false),
     "SONOS_AVAILABLE"=>env("SONOS_AVAILABLE",false),
     "SONOS_URL"=>env("SONOS_URL","https://yoursite/streamsonos"),
-	"maintenance_password"=>env("maintenance_password","admin"),
-	"CACHE"=>env("CACHE",false),
+    "maintenance_password"=>env("maintenance_password","admin"),
+    "CACHE"=>env("CACHE",false),
 
     /*
     |--------------------------------------------------------------------------
     | Application Name
     |--------------------------------------------------------------------------
     |
-    | This value is the name of your application. This value is used when the
+    | This value is the name of your application, which will be used when the
     | framework needs to place the application's name in a notification or
-    | any other location as required by the application or its packages.
+    | other UI elements where an application name needs to be displayed.
     |
     */
 
@@ -72,13 +69,11 @@ return [
     |
     | This URL is used by the console to properly generate URLs when using
     | the Artisan command line tool. You should set this to the root of
-    | your application so that it is used when running Artisan tasks.
+    | the application so that it's available within Artisan commands.
     |
     */
 
     'url' => env('APP_URL', 'http://localhost'),
-
-    'asset_url' => env('ASSET_URL'),
 
     /*
     |--------------------------------------------------------------------------
@@ -86,8 +81,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default timezone for your application, which
-    | will be used by the PHP date and date-time functions. We have gone
-    | ahead and set this to a sensible default for you out of the box.
+    | will be used by the PHP date and date-time functions. The timezone
+    | is set to "UTC" by default as it is suitable for most use cases.
     |
     */
 
@@ -99,53 +94,37 @@ return [
     |--------------------------------------------------------------------------
     |
     | The application locale determines the default locale that will be used
-    | by the translation service provider. You are free to set this value
-    | to any of the locales which will be supported by the application.
+    | by Laravel's translation / localization methods. This option can be
+    | set to any locale for which you plan to have translation strings.
     |
     */
 
-    'locale' => 'en',
+    'locale' => env('APP_LOCALE', 'en'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Application Fallback Locale
-    |--------------------------------------------------------------------------
-    |
-    | The fallback locale determines the locale to use when the current one
-    | is not available. You may change the value to correspond to any of
-    | the language folders that are provided through your application.
-    |
-    */
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
-    'fallback_locale' => 'en',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Faker Locale
-    |--------------------------------------------------------------------------
-    |
-    | This locale will be used by the Faker PHP library when generating fake
-    | data for your database seeds. For example, this will be used to get
-    | localized telephone numbers, street address information and more.
-    |
-    */
-
-    'faker_locale' => 'en_US',
+    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*
     |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |
-    | This key is used by the Illuminate encrypter service and should be set
-    | to a random, 32 character string, otherwise these encrypted strings
-    | will not be safe. Please do this before deploying an application!
+    | This key is utilized by Laravel's encryption services and should be set
+    | to a random, 32 character string to ensure that all encrypted values
+    | are secure. You should do this prior to deploying the application.
     |
     */
 
+    'cipher' => 'AES-256-CBC',
+
     'key' => env('APP_KEY'),
 
-    'cipher' => 'AES-256-CBC',
+    'previous_keys' => [
+        ...array_filter(
+            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+        ),
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -161,50 +140,8 @@ return [
     */
 
     'maintenance' => [
-        'driver' => 'file',
-        // 'store'  => 'redis',
+        'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
+        'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Autoloaded Service Providers
-    |--------------------------------------------------------------------------
-    |
-    | The service providers listed here will be automatically loaded on the
-    | request to your application. Feel free to add your own services to
-    | this array to grant expanded functionality to your applications.
-    |
-    */
-
-    'providers' => ServiceProvider::defaultProviders()->merge([
-        /*
-         * Package Service Providers...
-         */
-
-        /*
-         * Application Service Providers...
-         */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
-    ])->toArray(),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Class Aliases
-    |--------------------------------------------------------------------------
-    |
-    | This array of class aliases will be registered when this application
-    | is started. However, feel free to register as many as you wish as
-    | the aliases are "lazy" loaded so they don't hinder performance.
-    |
-    */
-
-    'aliases' => Facade::defaultAliases()->merge([
-        // 'Example' => App\Facades\Example::class,
-        'Helpers'	=> App\Providers\HelperServiceProvider::class,
-    ])->toArray(),
 
 ];

@@ -1,56 +1,36 @@
-<?php
-use App\Providers\HelperServiceProvider;
-?>
+@php
+use App\Helpers\Helpers;
+@endphp
 $("#hr").css('visibility','visible');
-<?php
-if (isset($biography)){
-	?>
-	$("#biography").html(<?php echo json_encode($biography);?>);
-	<?php
-}
-if (isset($albums)){
-	?>
-	$("#albums").html(<?php echo json_encode($albums);?>);	
-	<?php
-}
-if (isset($similars)){
-	?>
-	$("#artistes").html(<?php echo json_encode($similars);?>);
-	<?php
-}
-
-if (isset($videos)){
-	?>
-	$("#albums_youtube").html(<?php echo json_encode($videos);?>);
-	<?php
-}
-
-if (isset($lives)){
-	?>
-	$("#lives_youtube").html(<?php echo json_encode($lives);?>);
-	<?php
-}
-
-if (isset($artist_name)){
-	?>
-	$("#menu_name").html(<?php echo json_encode(HelperServiceProvider::replaceUpperChar($artist_name));?>);
-	$("#title_seo").html(<?php echo json_encode($artist_name);?>);
-	$("#albums_youtube_query").attr("value",<?php echo json_encode($artist_name." album");?>);
-	$("#lives_youtube_query").attr("value",<?php echo json_encode($artist_name." live");?>);
-	$("#btn_url").val(<?php echo json_encode(config("app.url")."/artist/".HelperServiceProvider::replaceUpperChar($artist_name));?>);
-	$("#btn_artist").val(<?php echo json_encode(HelperServiceProvider::replaceUpperChar($artist_name));?>);
+@if (isset($biography))
+	$("#biography").html({!! json_encode($biography)!!});
+@endif
+@if (isset($albums))
+	$("#block_albums").html({!!json_encode($albums)!!});
+@endif
+@if (isset($similars))
+	$("#block_artistes").html({!!json_encode($similars)!!});
+@endif
+@if (isset($videos))
+	$("#block_albums_youtube").html({!!json_encode($videos)!!});
+@endif
+@if (isset($lives))
+	$("#block_lives_youtube").html({!!json_encode($lives)!!});
+@endif
+@if (isset($artist_name))
+	$("#menu_name").html({!! json_encode(Helpers::replaceUpperChar($artist_name))!!});
+	$("#title_seo").html({!!json_encode($artist_name)!!});
+	$("#albums_youtube_query").attr("value",{!! json_encode($artist_name." album")!!});
+	$("#lives_youtube_query").attr("value",{!! json_encode($artist_name." live")!!});
+	$("#btn_url").val({!! json_encode(config("app.url")."/artist/".Helpers::replaceUpperChar
+($artist_name))!!});
+	$("#btn_artist").val({!!json_encode(Helpers::replaceUpperChar($artist_name))!!});
 	addShareBtn();
-	<?php
-}
-
-if (isset($info_album)){
-	?>
-	$("#album_detail").html(<?php echo json_encode($info_album);?>);
+@endif
+@if (isset($info_album))
+	$("#album_detail").html({!!json_encode($info_album)!!});
 	showAlbum();
-	<?php
-}
-?>
+@endif
 
 loadImages();
 $("#loader").hide();
-

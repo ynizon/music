@@ -1,3 +1,4 @@
+@php use App\Helpers\Helpers; @endphp
 @extends('layouts.app')
 
 @section('content')
@@ -20,7 +21,9 @@
 				<div class="search">
 				  <ul class="nav1">
 					<li id="search">
-						<input onkeypress="if (event.keyCode == 13){homeToGo();}" type="text" name="q2" id="q2" class="home_q" value="<?php if (isset($artist_name)){echo $artist_name;}?>" placeholder="Rechercher"/>
+						<input onkeypress="if (event.keyCode === 13){homeToGo();}" type="text"
+							   name="q2" id="q2" class="home_q"
+							   value="<?php if (isset($artist_name)){echo $artist_name;}?>" placeholder="Rechercher"/>
 					</li>
 					<li id="options" style="text-align:right;" onclick="homeToGo()">
 						<a href="#" style="min-width:100%;background-image:none;"><i class="fa fa-search cursor" ></i></a>
@@ -71,10 +74,13 @@
 								
 								?>
 								<div class="col-md-2 col_1  pointer tc"  >
-									<a href='/artist/<?php echo str_replace("/","",str_replace("%2f","",strtolower(urlencode($oArtist["name"]))));?>'>
-										<h5 class='homeh5'><?php echo $oArtist["name"];?></h5>				
+									<a href='/go/{{ str_replace("/","",str_replace("%2f","",strtolower(urlencode
+									($oArtist["name"]))))}}'>
+										<h5 class='homeh5'>{{ $oArtist["name"]}}</h5>
 										<div class="bloc_home">
-											<img style="max-height:174px;margin:auto;" src="<?php echo $sImage;?>" class="img-responsive" alt="<?php echo str_replace('"','\"',$oArtist["name"]);?>"/>
+											<img style="max-height:174px;margin:auto;" src="{{ $sImage}}"
+												 class="img-responsive"
+												 alt="{{ str_replace('"','\"',$oArtist["name"])}}"/>
 										</div>
 									</a>
 								</div>			
@@ -105,8 +111,9 @@
 									}
 									?>
 									<div class="col-md-2 col_1  pointer tc" >
-										<a href='/artist/<?php echo str_replace("/","",str_replace("%2f","",strtolower(urlencode($oArtist->name))));?>'>
-											<h5 class='homeh5'><?php echo $oArtist->name;?></h5>
+										<a href='/go/{{ str_replace("/","",str_replace("%2f","",strtolower
+										(urlencode($oArtist->name))))}}'>
+											<h5 class='homeh5'>{{ $oArtist->name}}</h5>
 											<div class="bloc_home">
 												<?php
 												$pic = $oArtist->image[2]->$sTxt;
@@ -116,7 +123,9 @@
 													}
 												}
 												?>
-												<img style="max-height:174px;margin:auto;" src="<?php echo $pic;?>" class="img-responsive" alt="<?php echo str_replace('"','\"',$oArtist->name);?>"/>
+												<img style="max-height:174px;margin:auto;" src="{{ $pic}}"
+													 class="img-responsive"
+													 alt="{{ str_replace('"','\"',$oArtist->name)}}"/>
 											</div>
 										</a>
 									</div>			
@@ -144,8 +153,9 @@
 							if ($i < 12){
 							?>
 							<div class="col-md-2 col_1 pointer tc">
-								<a href='/artist/<?php echo str_replace("/","",str_replace("%2f","",strtolower(urlencode($oArtist->name))));?>'>
-									<h5 class='homeh5'><?php echo $oArtist->name;?></h5>
+								<a href='/go/{{ str_replace("/","",str_replace("%2f","",strtolower(urlencode
+								($oArtist->name))))}}'>
+									<h5 class='homeh5'>{{ $oArtist->name}}</h5>
 									<div class="bloc_home">
 										<?php 
 										$pic = $oArtist->image[2]->$sTxt;
@@ -155,7 +165,9 @@
 											}
 										}
 										?>
-										<img style="max-height:174px;margin:auto;" src="<?php echo $pic?>" class="img-responsive" alt="<?php echo str_replace('"','\"',$oArtist->name);?>" />
+										<img style="max-height:174px;margin:auto;" src="{{ $pic}}"
+										class="img-responsive"
+											 alt="{{ str_replace('"','\"',$oArtist->name)}}" />
 									</div>
 								</a>
 							</div>					

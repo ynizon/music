@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Aerni\Spotify\Spotify;
+use App\Models\SpotifyUp;
+use App\Policies\UserPolicy;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -18,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
                 'locale' => config('spotify.default_config.locale'),
                 'market' => config('spotify.default_config.market'),
             ];
-            return new \App\Models\SpotifyUp($defaultConfig);
+            return new SpotifyUp($defaultConfig);
         });
     }
 

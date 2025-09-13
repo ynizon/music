@@ -1,3 +1,4 @@
+@php use App\Helpers\Helpers; @endphp
 @extends('layouts.app')
 
 @section('content')
@@ -14,14 +15,14 @@
 		<style>
 		.menu_q{display:none;}
 		</style>
-		<div class="banner banner<?php echo rand(1,3);?>">
+		<div class="banner banner{{ rand(1,3)}}">
 			<div class="span_1_of_1">
 				<h2>Désolé, ce site est actuellement surchargé<br/>merci de monter le votre, <a href='https://github
-				.com/ynizon/music'>grâce aux sources,<br/> ou <a href="/admin">d'ajouter votre IP.</a></h2>
+				.com/ynizon/music'>grâce aux sources</a>,<br/> ou <a href="/admin">d'ajouter votre IP ({{$_SERVER['REMOTE_ADDR']}}).</a></h2>
 				<div class="search">
 				  <ul class="nav1">
 					<li id="search">
-						<input onkeypress="if (event.keyCode == 13){homeToGo();}" type="text" name="q2" id="q2" class="home_q" value="<?php if (isset($artist_name)){echo $artist_name;}?>" placeholder="Rechercher"/>
+						<input onkeypress="if (event.keyCode === 13){homeToGo();}" type="text" name="q2" id="q2" class="home_q" value="<?php if (isset($artist_name)){echo $artist_name;}?>" placeholder="Rechercher"/>
 					</li>
 					<li id="options" style="text-align:right;" onclick="homeToGo()">
 						<a href="#" style="min-width:100%;background-image:none;"><i class="fa fa-search cursor" ></i></a>
@@ -72,10 +73,13 @@
 								
 								?>
 								<div class="col-md-2 col_1  pointer tc"  >
-									<a href='/artist/<?php echo str_replace("/","",str_replace("%2f","",strtolower(urlencode($oArtist["name"]))));?>'>
-										<h5 class='homeh5'><?php echo $oArtist["name"];?></h5>				
+									<a href='/go/{{ str_replace("/","",str_replace("%2f","",strtolower(urlencode
+									($oArtist["name"]))))}}'>
+										<h5 class='homeh5'>{{ $oArtist["name"]}}</h5>
 										<div class="bloc_home">
-											<img style="max-height:174px;margin:auto;" src="<?php echo $sImage;?>" class="img-responsive" alt="<?php echo str_replace('"','\"',$oArtist["name"]);?>"/>
+											<img style="max-height:174px;margin:auto;" src="{{ $sImage}}"
+												 class="img-responsive" alt="{{ str_replace('"','\"',$oArtist["name"])
+											}}"/>
 										</div>
 									</a>
 								</div>			
@@ -106,8 +110,9 @@
 									}
 									?>
 									<div class="col-md-2 col_1  pointer tc" >
-										<a href='/artist/<?php echo str_replace("/","",str_replace("%2f","",strtolower(urlencode($oArtist->name))));?>'>
-											<h5 class='homeh5'><?php echo $oArtist->name;?></h5>
+										<a href='/go/{{ str_replace("/","",str_replace("%2f","",strtolower
+										(urlencode($oArtist->name))))}}'>
+											<h5 class='homeh5'>{{ $oArtist->name}}</h5>
 											<div class="bloc_home">
 												<?php
 												$pic = $oArtist->image[2]->$sTxt;
@@ -117,7 +122,9 @@
 													}
 												}
 												?>
-												<img style="max-height:174px;margin:auto;" src="<?php echo $pic;?>" class="img-responsive" alt="<?php echo str_replace('"','\"',$oArtist->name);?>"/>
+												<img style="max-height:174px;margin:auto;" src="{{ $pic}}"
+													 class="img-responsive" alt="{{ str_replace('"','\"',
+												$oArtist->name)}}"/>
 											</div>
 										</a>
 									</div>			
@@ -145,8 +152,9 @@
 							if ($i < 12){
 							?>
 							<div class="col-md-2 col_1 pointer tc">
-								<a href='/artist/<?php echo str_replace("/","",str_replace("%2f","",strtolower(urlencode($oArtist->name))));?>'>
-									<h5 class='homeh5'><?php echo $oArtist->name;?></h5>
+								<a href='/go/{{ str_replace("/","",str_replace("%2f","",strtolower(urlencode
+								($oArtist->name))))}}'>
+									<h5 class='homeh5'>{{ $oArtist->name}}</h5>
 									<div class="bloc_home">
 										<?php 
 										$pic = $oArtist->image[2]->$sTxt;
@@ -156,7 +164,8 @@
                                             }
                                         }
 										?>
-										<img style="max-height:174px;margin:auto;" src="<?php echo $pic?>" class="img-responsive" alt="<?php echo str_replace('"','\"',$oArtist->name);?>" />
+										<img style="max-height:174px;margin:auto;" src="{{ $pic}}"
+											 class="img-responsive" alt="{{ str_replace('"','\"',$oArtist->name)}}" />
 									</div>
 								</a>
 							</div>					

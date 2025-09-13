@@ -1,45 +1,30 @@
 <?php
 
 namespace App\Http\Controllers;
-use Response;
-
-use Cookie;
-use Illuminate\Http\Request;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Title;
+use App\Repositories\AlbumRepository;
 use App\Repositories\ArtistRepository;
 use App\Repositories\TitleRepository;
-use App\Repositories\AlbumRepository;
 use Barryvanveen\Lastfm\Lastfm;
 use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 
 class HomeController extends Controller
 {
-	protected $artistRepository;
-	protected $albumRepository;
-	protected $titleRepository;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct(ArtistRepository $artistRepository, AlbumRepository $albumRepository, TitleRepository $titleRepository)
+    public function __construct(
+        protected ArtistRepository $artistRepository,
+        protected AlbumRepository $albumRepository,
+        protected TitleRepository $titleRepository)
     {
-      //  $this->middleware('auth');
-	  $this->artistRepository = $artistRepository;
-	  $this->albumRepository = $albumRepository;
-	  $this->titleRepository = $titleRepository;
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(Request $request)
     {
-		$dir = dirname(__FILE__)."/../../../storage";
+		$dir = storage_path();
 
-		$sArtistes = "";
 		$sMaj = "";
 		$interval = 0;
 		if (file_exists($dir."/maj.txt")){
@@ -54,7 +39,8 @@ class HomeController extends Controller
 		$sFile = $dir."/home.txt";
 		if ($sMaj == "" or $interval > 3){
 			file_put_contents($dir."/maj.txt",date("Y-m-d"));
-			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".config("lastfm.api_key");
+			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".
+                config("lastfm.api_key");
             file_put_contents($sFile,file_get_contents($sUrl));
 		}
 		$artistes = json_decode(file_get_contents($sFile));
@@ -86,7 +72,7 @@ class HomeController extends Controller
 		if ("" != Cookie::get('lastfm_login')){
 			$lastfm_login = Cookie::get('lastfm_login');
 		}
-		Cookie::queue("lastfm_login", $lastfm_login, 1314000);
+		Cookie::make("lastfm_login", $lastfm_login, 1314000);
 
         return view('page/welcome', compact('artistes','preferences','similar','artist_name'));
     }
@@ -120,7 +106,7 @@ class HomeController extends Controller
 
 		if ($request->input("lastfm_login") != ""){
 			$lastfm_login = $request->input("lastfm_login");
-			Cookie::queue("lastfm_login", $lastfm_login, 1314000);
+			Cookie::make("lastfm_login", $lastfm_login, 1314000);
 
 			if (config("app.ALLOW_OTHER_IPS")){
 				$_SESSION["addip"]=$_SERVER['REMOTE_ADDR'];
@@ -134,8 +120,6 @@ class HomeController extends Controller
 
 	/**
      * Busy page
-     *
-     * @return \Illuminate\Http\Response
      */
     public function busy()
     {
@@ -188,9 +172,10 @@ class HomeController extends Controller
 		if ("" != Cookie::get('lastfm_login')){
 			$lastfm_login = Cookie::get('lastfm_login');
 		}
-		Cookie::queue("lastfm_login", $lastfm_login, 1314000);
+		Cookie::make("lastfm_login", $lastfm_login, 1314000);
 
-        return view('page/busy', compact('artistes','preferences','similar','artist_name'));
+        return view('page/busy', compact('artistes','preferences',
+                                         'similar','artist_name'));
     }
 
 	public function faq(Request $request){
@@ -204,7 +189,7 @@ class HomeController extends Controller
 	public function sitemap(Request $request){
 		set_time_limit(0);
 
-		$dir = dirname(__FILE__)."/../../../storage";
+		$dir = storage_path();
 
 		$tabMaj = array();
 
@@ -213,7 +198,6 @@ class HomeController extends Controller
 		$tabMaj["album"] = date("Y-m-d");
 		$tabMaj["title"] = date("Y-m-d");
 
-		$interval = 0;
 		$datetime1 = date_create(date("Y-m-d"));
 
 		$bNew = true;
@@ -230,35 +214,25 @@ class HomeController extends Controller
 			if ($bNew or $interval > 3){
 				switch ($field){
 					case "artist":
-						$infos = $this->artistRepository->getAll();
+						$infos = Artist::all();
 						break;
 					case "album":
-						$infos = $this->albumRepository->getAll();
+						$infos = Album::all();
 						break;
 					case "title":
-						$infos = $this->titleRepository->getAll();
+						$infos = Title::all();
 						break;
 				}
 				$sitemap_url = config("app.sitemap_url")."/sitemap-".$field.".xml";
 
 				$urls = array();
 				foreach ($infos as $info){
-					switch ($field){
-						case "artist":
-							$url = config("app.sitemap_url")."/artist/".urlencode(str_replace("/","",$info->name));
-							break;
-						case "album":
-							$url = config("app.sitemap_url")."/artist/".urlencode(str_replace("/","",$info->artist))."/".urlencode(str_replace("/","",$info->name));
-							break;
-						case "title":
-							$url = config("app.sitemap_url")."/artist/".urlencode(str_replace("/","",$info->artist))."/".urlencode(str_replace("/","",$info->album))."/".urlencode(str_replace("/","",$info->name));
-							break;
-					}
+                    $url = config("app.sitemap_url")."/artist/".$info->slug;
 					$urls[$url] = str_replace(" ","T",$info->updated_at)."+00:00";
 				}
 
 				$content = view('page/sitemap-infos',compact("urls","sitemap_url"));
-				file_put_contents($dir."/../public/sitemap-".$field.".xml",$content);
+                file_put_contents($dir."/../public/sitemap-".$field.".xml",$content);
 			}
 		}
 
@@ -269,7 +243,7 @@ class HomeController extends Controller
 		file_put_contents($sFile,json_encode($tabMaj));
 
 		$content = view('page/sitemap');
-		return Response::make($content, '200')->header('Content-Type', 'text/xml');
+		return Response($content, '200')->header('Content-Type', 'application/xml');
 	}
 
 	public function download(Request $request){
