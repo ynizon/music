@@ -5,47 +5,57 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AjaxController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SpotController;
 
 Route::get('/busy', [HomeController::class,'busy']);
 Route::get('/home', [HomeController::class,'index'])->name('home');
 Route::get('/lastfm_login', [HomeController::class,'lastfm_login']);
 Route::post('/lastfm_login', [HomeController::class,'lastfm_login']);
 
-$allowedIps = config("app.ONLY_IP");
-if (Ip::all()->count() > 0){
-    foreach (Ip::all() as $ip){
-        $allowedIps[] = $ip['ip'];
-    }
-}
 
-if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedIps)){
-    Route::get('/', [HomeController::class,'index']);
-    Route::get('/sitemap.xml', [HomeController::class,'sitemap']);
-    Route::get('/contact', [HomeController::class,'contact']);
-    Route::get('/faq', [HomeController::class,'faq']);
-    Route::get('/download', [HomeController::class,'download']);
+if (App::runningInConsole()) {
+	//No control
+} else {
+	$allowedIps = config("app.ONLY_IP");
+	if (Ip::all()->count() > 0){
+		foreach (Ip::all() as $ip){
+			$allowedIps[] = $ip['ip'];
+		}
+	}
 
-    Route::get('/search', [SearchController::class,'index']);
-    Route::get('/ajax/flip/{artist_name}', [AjaxController::class,'flip']);
-    Route::get('/ajax/autocomplete', [AjaxController::class,'autocomplete']);
-    Route::post('/ajax/keyword', [AjaxController::class,'keyword']);
+	if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedIps)){
+		Route::get('/', [HomeController::class,'index']);
+		Route::get('/sitemap.xml', [HomeController::class,'sitemap']);
+		Route::get('/contact', [HomeController::class,'contact']);
+		Route::get('/faq', [HomeController::class,'faq']);
+		Route::get('/download', [HomeController::class,'download']);
 
-    Route::get('/ajax/artist/{artist_name}', [AjaxController::class,'artist']);
-    Route::get('/ajax/artist/{artist_name}/{album_name}', [AjaxController::class,'artist_album']);
-    Route::get('/ajax/artist/{artist_name}/{album_name}/{title_name}', [AjaxController::class,'artist_album_title']);
+		Route::get('/search', [SearchController::class,'index']);
+		Route::get('/ajax/flip/{artist_name}', [AjaxController::class,'flip']);
+		Route::get('/ajax/autocomplete', [AjaxController::class,'autocomplete']);
+		Route::post('/ajax/keyword', [AjaxController::class,'keyword']);
 
-    Route::get('/artist', [SearchController::class,'index']);
-    Route::get('/go/{artist_name}', [SearchController::class,'go']);
-    Route::get('/artist/{artist_name}', [SearchController::class,'artist']);
-    Route::get('/artist/{artist_name}/{album_name}', [SearchController::class,'artist_album']);
-    Route::get('/artist/{artist_name}/{album_name}/{title_name}', [SearchController::class,'artist_album_title']);
+		Route::get('/ajax/artist/{artist_name}', [AjaxController::class,'artist']);
+		Route::get('/ajax/artist/{artist_name}/{album_name}', [AjaxController::class,'artist_album']);
+		Route::get('/ajax/artist/{artist_name}/{album_name}/{title_name}', [AjaxController::class,'artist_album_title']);
 
-    Route::get('/picture/{mbid}', [SearchController::class,'picture']);
-    Route::get('/sonos', [SearchController::class,'sonos']);
-}else{
-    if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/admin" && $_SERVER['REQUEST_URI'] != "/busy"
-        && $_SERVER['REQUEST_URI'] != "/livewire/update" && $_SERVER['REQUEST_URI'] != "/lastfm_login"){
-        header("location: /busy");
-        exit();
-    }
+        Route::get('/spotdl', [SpotController::class,'index']);
+        Route::post('/spotdl', [SpotController::class,'index']);
+        Route::get('/spotdl/scan', [SpotController::class,'scan']);
+
+		Route::get('/artist', [SearchController::class,'index']);
+		Route::get('/go/{artist_name}', [SearchController::class,'go']);
+		Route::get('/artist/{artist_name}', [SearchController::class,'artist']);
+		Route::get('/artist/{artist_name}/{album_name}', [SearchController::class,'artist_album']);
+		Route::get('/artist/{artist_name}/{album_name}/{title_name}', [SearchController::class,'artist_album_title']);
+
+		Route::get('/picture/{mbid}', [SearchController::class,'picture']);
+		Route::get('/sonos', [SearchController::class,'sonos']);
+	}else{
+		if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/admin" && $_SERVER['REQUEST_URI'] != "/busy"
+			&& $_SERVER['REQUEST_URI'] != "/livewire/update" && $_SERVER['REQUEST_URI'] != "/lastfm_login"){
+			header("location: /busy");
+			exit();
+		}
+	}
 }

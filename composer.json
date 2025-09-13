@@ -10,9 +10,10 @@
         "aerni/laravel-spotify": "^3.0",
         "barryvanveen/lastfm": "^2.0",
         "filament/filament": "^4.0",
-        "laravel/framework": "^12.0",
+        "laravel/framework": "^11.0",
         "laravel/tinker": "^2.10.1",
-      "ext-zlib": "*"
+      "ext-zlib": "*",
+        "ext-curl": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

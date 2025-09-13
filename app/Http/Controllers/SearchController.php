@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Helpers;
 use App\Models\Album;
 use App\Models\Artist;
+use App\Models\Spotdl;
 use App\Models\Title;
 use App\Repositories\AlbumRepository;
 use App\Repositories\ArtistRepository;
@@ -138,8 +139,8 @@ class SearchController extends BaseController
 				"verify_peer"=>false,
 				"verify_peer_name"=>false,
 			),
-		);  
-		header("Content-type: image/png");		
+		);
+		header("Content-type: image/png");
 		$url = Helpers::getPic($mbid,$request->input('default'));
 		echo file_get_contents($url, false, stream_context_create($arrContextOptions));
 	}
