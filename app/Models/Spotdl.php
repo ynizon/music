@@ -14,7 +14,29 @@ class Spotdl extends Model
         'album',
         'path',
         'spotifyurl',
+        'todo',
+        'done',
     ];
+
+    public function isDone() : boolean
+    {
+        return $this->done;
+    }
+
+    public function setDone(boolean $done) : void
+    {
+        $this->done = $done;
+    }
+
+    public function isTodo() : boolean
+    {
+        return $this->todo;
+    }
+
+    public function setTodo(boolean $todo) : void
+    {
+        $this->todo = $todo;
+    }
 
     public function getAlbum() : string
     {

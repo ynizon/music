@@ -13,11 +13,15 @@
 							</h2>
 							<div id="spots">
                                 <form method="">
-                                    <ul>
+                                    <ul style="list-style: none">
+                                        <li>
+                                            <input type="checkbox" value="" id="chk_0">
+                                            <label for="chk_0"> - Tous - </label>
+                                        </li>
                                     @foreach ($spots as $spot)
                                         <li>
-                                            <input type="checkbox" value="{{$spot['id']}}">
-                                            {{$spot['artist']}} - {{$spot['album']}}
+                                            <input type="checkbox" value="{{$spot->id}}" id="chk_{{$loop->index}}">
+                                            <label for="chk_{{$loop->index}}">{{$spot->artist}} - {{$spot->album}}</label>
                                         </li>
                                     @endforeach
                                     </ul>

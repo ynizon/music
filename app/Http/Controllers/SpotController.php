@@ -43,6 +43,7 @@ class SpotController extends BaseController
                     $path = env("PATH_MUSIC").$artist["path"];
                     if (!is_dir($path)){
                         mkdir($path);
+                        chmod($path, 0777);
                     }
 
                     //Recup des albums
@@ -65,6 +66,7 @@ class SpotController extends BaseController
                                 $pathAlbum = $path."/".$artistName." - ".$this->replaceChar($albumName);
                                 if (!is_dir($pathAlbum)){
                                     mkdir($pathAlbum);
+                                    chmod($pathAlbum, 0777);
                                 }
 
                                 //Check sur Spotify
@@ -75,16 +77,18 @@ class SpotController extends BaseController
                                     $spotifyUrl = $data['albums']['items'][0]["external_urls"]["spotify"];
                                 }
 
-                                //Lancement du docker de download
                                 if ($spotifyUrl != ""){
                                     $spotDl = Spotdl::where("spotifyurl","=",$spotifyUrl)->first();
+
                                     if (!$spotDl){
                                         $spotDl = new Spotdl();
                                         $spotDl->setArtist($artistName);
                                         $spotDl->setAlbum($albumName);
                                         $spotDl->setPath($pathAlbum);
                                         $spotDl->setSpotifyurl($spotifyUrl);
+                                        $spotDl->save();
                                     }
+                                    //Lancement du docker de download
                                     //$docker = env("SPOTIFY_SH")." \"".$pathAlbum."\" \"". $spotifyUrl. "\" 2>&1";
                                     //shell_exec($docker);
                                 }

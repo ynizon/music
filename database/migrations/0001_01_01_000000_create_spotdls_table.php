@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('artist');
             $table->string('album');
             $table->string('path');
+            $table->boolean('todo')->default(false);
+            $table->boolean('done')->default(false);
             $table->string('spotifyurl')->unique();
             $table->timestamps();
         });
