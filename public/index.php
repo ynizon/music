@@ -1,5 +1,5 @@
 <?php
-
+putenv("GOOGLE_APPLICATION_CREDENTIALS=../config/t412-174617-2943404bd220.json");
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 

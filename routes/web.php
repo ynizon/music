@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Ip;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AjaxController;
@@ -12,10 +13,9 @@ Route::get('/home', [HomeController::class,'index'])->name('home');
 Route::get('/lastfm_login', [HomeController::class,'lastfm_login']);
 Route::post('/lastfm_login', [HomeController::class,'lastfm_login']);
 
+Route::get('/cron', [SpotController::class,'cron']);
 
-if (App::runningInConsole()) {
-	//No control
-} else {
+if (!App::runningInConsole()) {
 	$allowedIps = config("app.ONLY_IP");
 	if (Ip::all()->count() > 0){
 		foreach (Ip::all() as $ip){
@@ -41,7 +41,7 @@ if (App::runningInConsole()) {
 
         Route::get('/spotdl', [SpotController::class,'index']);
         Route::post('/spotdl', [SpotController::class,'index']);
-        Route::get('/spotdl/scan', [SpotController::class,'scan']);
+        Route::post('/spotdl/playlist', [SpotController::class,'playlist']);
 
 		Route::get('/artist', [SearchController::class,'index']);
 		Route::get('/go/{artist_name}', [SearchController::class,'go']);
@@ -51,9 +51,9 @@ if (App::runningInConsole()) {
 
 		Route::get('/picture/{mbid}', [SearchController::class,'picture']);
 		Route::get('/sonos', [SearchController::class,'sonos']);
-	}else{
-		if (isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/admin" && $_SERVER['REQUEST_URI'] != "/busy"
-			&& $_SERVER['REQUEST_URI'] != "/livewire/update" && $_SERVER['REQUEST_URI'] != "/lastfm_login"){
+	} else {
+        $urlsOK = ["/admin", "/admin/login","/busy", "/livewire/update", "/lastfm_login'"];
+        if (isset($_SERVER['REQUEST_URI']) && !in_array($_SERVER['REQUEST_URI'], $urlsOK)){
 			header("location: /busy");
 			exit();
 		}

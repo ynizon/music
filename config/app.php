@@ -3,24 +3,13 @@
 return [
     # Google credentials and configuration
     "ONLY_IP" => explode(",",env("ONLY_IP")),
-    "ONLY_SONOS_IP" => explode(",",env("ONLY_SONOS_IP")),
     "LASTFM_API"=>env("LASTFM_API"),//Non utilisee
     "LASTFM_SECRET"=>env("LASTFM_SECRET"),//Non utilisee
     "ALLOW_OTHER_IPS"=>env("ALLOW_OTHER_IPS", false),//Non utilisee
     "DELAY_CACHE"=>300,
     "ANALYTICS_UA"=>env("ANALYTICS_UA"),
     "YOUTUBE_API"=>env("YOUTUBE_API"),
-    "FLICKR_API"=>env("FLICKR_API"),
-    'AMAZON_AWS_API_KEY'=> env('AMAZON_AWS_API_KEY'),
-    'AMAZON_AWS_API_SECRET_KEY'=> env('AMAZON_AWS_API_SECRET_KEY'),
-    'AMAZON_ASSOCIATE_TAG'=>env('AMAZON_ASSOCIATE_TAG'),
-    'AMAZON_LANGUAGE'=>env('AMAZON_LANGUAGE','fr'),
-    "MUSESCORE_API"=>env("MUSESCORE_API"),
-    "MUSESCORE_SECRET"=>env("MUSESCORE_SECRET"),
     "DOWNLOAD_AVAILABLE"=>env("DOWNLOAD_AVAILABLE",false),
-    "SONOS_AVAILABLE"=>env("SONOS_AVAILABLE",false),
-    "SONOS_URL"=>env("SONOS_URL","https://yoursite/streamsonos"),
-    "maintenance_password"=>env("maintenance_password","admin"),
     "CACHE"=>env("CACHE",false),
 
     /*
