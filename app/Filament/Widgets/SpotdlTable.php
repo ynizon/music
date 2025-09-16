@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\Spotdls\SpotdlResource;
 use App\Models\Spotdl;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -30,11 +31,15 @@ class SpotdlTable extends TableWidget
             ->columns([
                   TextColumn::make('artist')
                       ->searchable()
+                      ->url(fn ($record): string => $record->spotifyurl)
+                      ->openUrlInNewTab()
                       ->label('Artiste'),
                   TextColumn::make('album')
                     ->searchable(),
                   ToggleColumn::make("todo")
                     ->label('A faire'),
+                  ToggleColumn::make("done")
+                    ->label('Téléchargé'),
             ])
             ->filters([
                 //

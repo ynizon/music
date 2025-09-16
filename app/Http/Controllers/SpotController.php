@@ -23,7 +23,7 @@ class SpotController extends BaseController
             $spotsDone[] = $spot;
             $docker = env("SPOTIFY_SH")." \"".$spot->getPath()."\" \"". $spot->getSpotifyurl(). "\" 2>&1";
             shell_exec($docker);
-            $spot->delete();
+            $spot->update(['done'=>1]);
         }
 
         return view("spotdl/index", compact('newspots', 'spotsDone'));
