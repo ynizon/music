@@ -27,12 +27,12 @@ class AjaxController extends BaseController
         protected AlbumRepository $albumRepository,
         protected TitleRepository $titleRepository){
 	}
-	
+
 	public function artist(Request $request, $artist_name){
 		$artist_name = urldecode($artist_name);
 
 		//Recup du cache
-		$cache = [];//Helpers::getCache($artist_name);
+		$cache = Helpers::getCache($artist_name);
 		if (isset($cache["biography"]) && isset($cache["albums"]) && isset($cache["similars"])
             && isset($cache["videos"]) && isset($cache["lives"])){
 			if (isset($cache["biography"])){
@@ -114,7 +114,7 @@ class AjaxController extends BaseController
 		return view('ajax/blocs', compact('biography','videos','lives',
                                           'artist_name','info_album','album_name') );
 	}
-	
+
 	public function artist_album_title(Request $request, $artist_name,$album_name, $title_name){
 		$artist_name = urldecode($artist_name);
 		$album_name = urldecode($album_name);
@@ -153,16 +153,16 @@ class AjaxController extends BaseController
 			$videos = View::make('livewire/videos', compact('artist','album','title'))->render();
 		}
 		$artist_name = strtoupper($artist_name);
-		
+
 		return view('ajax/blocs', compact('videos','artist_name') );
 	}
-	
+
 	//On requete un truc
 	public function keyword(Request $request){
 		try{
 			$album = new Album();
 			$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=".
-                urlencode($request->input("keywords"))."&maxResults=50&key=".config("app.YOUTUBE_API");
+                urlencode($request->input("keywords"))."&maxResults=50&key=".env("YOUTUBE_API");
 			$sBio = Helpers::getYoutubeData($url);
 			if (trim($sBio) != ""){
                 $sBio = json_decode($sBio, true);
@@ -183,14 +183,14 @@ class AjaxController extends BaseController
 				$lives = View::make('livewire/videos', compact('album'))->render();
 			}else{
 				$videos = View::make('livewire/videos', compact('album'))->render();
-			}		
-			
+			}
+
 			return view('ajax/blocs', compact('videos','lives') );
 		}catch(\Exception $e){
             return response()->json(['error' => $e->getMessage()], 500);
 		}
 	}
-	
+
 	public function autocomplete(Request $request) : JsonResponse{
 		$json = array();
 		if ("" != ($request->input("term")) and "" != ($request->input("mode"))){
@@ -203,7 +203,7 @@ class AjaxController extends BaseController
                         urlencode(utf8_decode($sArtist))."&lang=fr&format=json&api_key=".config("lastfm.api_key");
 					$contenu = json_decode(file_get_contents($sUrl));
 					if (is_array($contenu->results->artistmatches->artist)){
-						foreach ($contenu->results->artistmatches->artist as $artist){							
+						foreach ($contenu->results->artistmatches->artist as $artist){
 							$o = new \StdClass();
 							$o->id = $artist->mbid;
 							$o->label = Helpers::strangeChar($artist->name);
@@ -216,7 +216,7 @@ class AjaxController extends BaseController
 						$json[] = $o;
 					}
 					break;
-					
+
 				case "album":
 					$sAlbum = trim($request->input("term"));
 					$sAlbum = utf8_encode($sAlbum);
@@ -229,14 +229,14 @@ class AjaxController extends BaseController
 							$o->label = Helpers::strangeChar($album->name);
 							$json[] = $o;
 						}
-					}else{			
+					}else{
 						$o = new \StdClass();
 						$o->id = $contenu->results->albummatches->album->id;
 						$o->label = Helpers::strangeChar($contenu->results->albummatches->album->name);
 						$json[] = $o;
 					}
 					break;
-					
+
 				case "title":
 					$sArtist = trim($request->input("q"));
 					$sArtist = utf8_encode($sArtist);
@@ -247,7 +247,7 @@ class AjaxController extends BaseController
                         urlencode(utf8_decode($sTitle))."&lang=fr&format=json&api_key=".config("lastfm.api_key");
 					$contenu = json_decode(file_get_contents($sUrl));
 					if (is_array($contenu->results->trackmatches->track)){
-						foreach ($contenu->results->trackmatches->track as $track){							
+						foreach ($contenu->results->trackmatches->track as $track){
 							$o = new \StdClass();
 							$o->id = $track->name;
 							$o->label = Helpers::strangeChar($track->name);
@@ -261,12 +261,12 @@ class AjaxController extends BaseController
 					}
 					break;
 			}
-			
+
 		}
         return response()->json($json);
 	}
-	
-	
+
+
 	public function flip(Request $request, $artist_name){
 		$photos = array();
 
@@ -283,11 +283,11 @@ class AjaxController extends BaseController
 			}
 
 			$url = "https://api.flickr.com/services/rest/?".implode('&', $encoded_params);
-			
+
 			$rsp = file_get_contents($url);
 			$rsp_obj = unserialize($rsp);
 			$tabPhotos = $rsp_obj["photos"]["photo"];
-			
+
 			$i = 1;
 			while  ($i <= 2 and count($tabPhotos)>0){
 				$oPhoto = $tabPhotos[$i];
@@ -295,7 +295,7 @@ class AjaxController extends BaseController
 				$i++;
 			}
 		}
-		
+
 		return view('search/flip', compact('photos'));
 	}
 }

@@ -36,8 +36,9 @@ class SearchController extends BaseController
         $artist = $this->artistRepository->getBySlug(Str::slug($artist_name));
         if ($artist == null){
             $artist = new Artist(['name'=>$artist_name, 'slug' =>$artist_name]);
-            $artist->refreshData();
         }
+        $artist->refreshData();
+
         return redirect('/artist/'.$artist->slug);
     }
 
@@ -52,8 +53,8 @@ class SearchController extends BaseController
 
 		if ($artist == null){
             $artist = new Artist(['name'=>$artist_name, 'slug' =>$artist_name]);
-            $artist->refreshData();
 		}
+        $artist->refreshData();
 
 		//Ajout du cache
 		Helpers::setCache($artist);
@@ -72,15 +73,15 @@ class SearchController extends BaseController
         $artist = $this->artistRepository->getBySlug(Str::slug($artist_name));
         if ($artist == null){
             $artist = new Artist(['name'=>$artist_name, 'slug' =>$artist_name]);
-            $artist->refreshData();
 		}
+        $artist->refreshData();
 
 		$album = $this->albumRepository->getBySlug(Str::slug($artist_name) . "/". Str::slug($album_name));
 
 		if ($album == null){
             $album = new Album(['name'=>$album_name, 'slug' =>$album_name, 'artist'=>$artist]);
-            $album->refreshData();
 		}
+        $album->refreshData();
 
 		if ($album->getName() == "-"){
 			$album = null;
@@ -112,8 +113,8 @@ class SearchController extends BaseController
 
 		if ($album == null){
             $album = new Album(['name'=>$album_name, 'slug' =>$album_name, 'artist'=>$artist]);
-            $album->refreshData();
 		}
+        $album->refreshData();
 
 		if ($album->name == "-"){
 			$album = null;
@@ -124,8 +125,8 @@ class SearchController extends BaseController
 
 		if ($title == null){
             $title = new Title(['name'=>$title_name, 'slug' =>$title_name, 'artist'=>$artist, 'album'=>$album]);
-            $title->refreshData();
 		}
+        $title->refreshData();
 
 		//Ajout du cache
 		Helpers::setCache($artist, $album, $title);
@@ -144,13 +145,4 @@ class SearchController extends BaseController
 		$url = Helpers::getPic($mbid,$request->input('default'));
 		echo file_get_contents($url, false, stream_context_create($arrContextOptions));
 	}
-
-    public function sonos(Request $request){
-        if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],config("app.ONLY_SONOS_IP"))){
-            $url = config("app.SONOS_URL");
-            header("location: ".$url."?id=".$request->input("id") ."&name=".$request->input("name"));
-        }else{
-            return new Response('Forbidden', 403);
-        }
-    }
 }

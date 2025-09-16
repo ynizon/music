@@ -1,17 +1,6 @@
 <?php
 
 return [
-    # Google credentials and configuration
-    "ONLY_IP" => explode(",",env("ONLY_IP")),
-    "LASTFM_API"=>env("LASTFM_API"),//Non utilisee
-    "LASTFM_SECRET"=>env("LASTFM_SECRET"),//Non utilisee
-    "ALLOW_OTHER_IPS"=>env("ALLOW_OTHER_IPS", false),//Non utilisee
-    "DELAY_CACHE"=>300,
-    "ANALYTICS_UA"=>env("ANALYTICS_UA"),
-    "YOUTUBE_API"=>env("YOUTUBE_API"),
-    "DOWNLOAD_AVAILABLE"=>env("DOWNLOAD_AVAILABLE",false),
-    "CACHE"=>env("CACHE",false),
-
     /*
     |--------------------------------------------------------------------------
     | Application Name

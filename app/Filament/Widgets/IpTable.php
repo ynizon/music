@@ -15,6 +15,14 @@ use Illuminate\Database\Eloquent\Builder;
 
 class IpTable extends TableWidget
 {
+
+    protected static ?string $heading = "Autorisations d'IP";
+
+    public static function canView(): bool
+    {
+        return env("SPOTIFY_SH")!='' && env("LIDARR_API")!='';
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -33,7 +41,7 @@ class IpTable extends TableWidget
                              ->label('Ip')
                              ->required()
                              ->maxLength(255),
-                             ])
+                             ])->label("Nouvelle IP")
             ])
             ->recordActions([
                 EditAction::make()
@@ -42,8 +50,8 @@ class IpTable extends TableWidget
                              ->label('Ip')
                              ->required()
                              ->maxLength(255),
-                     ]),
-                DeleteAction::make(),
+                     ])->label("Modifier"),
+                DeleteAction::make()->label("Supprimer"),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

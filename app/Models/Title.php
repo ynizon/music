@@ -116,7 +116,7 @@ class Title extends Model
         try {
             $url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" .
                 urlencode($this->artist->getName() . " " . $this->getName()) .
-                "&maxResults=50&key=" . config("app.YOUTUBE_API");
+                "&maxResults=50&key=" . env("YOUTUBE_API");
             $sBio = Helpers::getYoutubeData($url);
 
             if ($sBio != null && trim($sBio) != "") {

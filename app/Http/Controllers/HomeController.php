@@ -108,10 +108,6 @@ class HomeController extends Controller
 			$lastfm_login = $request->input("lastfm_login");
 			Cookie::make("lastfm_login", $lastfm_login, 1314000);
 
-			if (config("app.ALLOW_OTHER_IPS")){
-				$_SESSION["addip"]=$_SERVER['REMOTE_ADDR'];
-			}
-
 			return redirect('/');
 		}else{
 			return view('lastfm/index', compact('lastfm_login'));

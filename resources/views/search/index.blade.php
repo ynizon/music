@@ -99,7 +99,7 @@
 								</div>
 								<iframe allow="autoplay" id="youtube" width="480" height="360" src="" frameborder="0" allowfullscreen="allowfullscreen" frameBorder="0" scrolling="no" style="display:none"></iframe>
 								<div style="text-align:center">
-									@if (config("app.DOWNLOAD_AVAILABLE"))
+									@if (env("DOWNLOAD_AVAILABLE"))
 										<a target="_blank" class="cursor" style="display:none" href='#' id="download" >Télécharger le MP3</a>
 									@endif
 									<span id="link_amazon"></span>

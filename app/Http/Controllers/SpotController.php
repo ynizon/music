@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Helpers\Helpers;
 use App\Models\Spotdl;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -12,47 +13,42 @@ class SpotController extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function index(Request $request){
-        $todo = 0;
-        if ($request->input("spotdls") != null) {
-            $todo = 1;
-        }
-        Spotdl::where('id', $request->input("spotdls"))->update(['todo' => $todo]);
-        $spots = Spotdl::all();
-
-        return view('spotdl/index',  compact('spots'));
-    }
-
     public function cron()
     {
-        $this->checkLidarr();
+        $newspots = $this->checkLidarr();
+        $spotsDone = [];
         $spots = Spotdl::where("todo","=","1")->get();
         foreach ($spots as $spot){
             //Lancement du docker de download
+            $spotsDone[] = $spot;
             $docker = env("SPOTIFY_SH")." \"".$spot->getPath()."\" \"". $spot->getSpotifyurl(). "\" 2>&1";
             shell_exec($docker);
+            $spot->delete();
         }
+
+        return view("spotdl/index", compact('newspots', 'spotsDone'));
     }
 
-    public function playlist(Request $request){
-        if ($request->input("playlist") != null && $request->input("spotify_url") != null ) {
-            $spotDl = Spotdl::where("spotifyurl","=",$request->input("spotify_url") )->first();
+//    public function playlist(Request $request){
+//        if ($request->input("playlist") != null && $request->input("spotify_url") != null ) {
+//            $spotDl = Spotdl::where("spotifyurl","=",$request->input("spotify_url") )->first();
+//
+//            if (!$spotDl) {
+//                $spotdl = new Spotdl();
+//            }
+//            $spotdl->setSpotifyurl($request->input("spotify_url"));
+//            $spotdl->setArtist("- PLAYLIST -");
+//            $spotdl->setAlbum($request->input("playlist"));
+//            $spotdl->setPath(env("PATH_MUSIC").env("PATH_PLAYLIST", "/0.Playlist/").Helpers::replaceCharsFilename($request->input
+//                             ("playlist")));
+//            $spotdl->save();
+//        }
+//        return redirect('/spotdl');
+//    }
 
-            if (!$spotDl) {
-                $spotdl = new Spotdl();
-            }
-            $spotdl->setSpotifyurl($request->input("spotify_url"));
-            $spotdl->setArtist("- PLAYLIST -");
-            $spotdl->setAlbum($request->input("playlist"));
-            $spotdl->setPath(env("PATH_MUSIC").env("PATH_PLAYLIST", "/0.Playlist/").$this->replaceChar($request->input
-                             ("playlist")));
-            $spotdl->save();
-        }
-        return redirect('/spotdl');
-    }
-
-    private function checkLidarr()
+    private function checkLidarr(): array
     {
+        $spots = [];
         if (env("LIDARR_URL") != "") {
             $artists = $this->lidarr_api("/api/v1/artist");
             if ($artists != null) {
@@ -62,6 +58,7 @@ class SpotController extends BaseController
 
                         //Rep artiste
                         $path = env("PATH_MUSIC") . $artist["path"];
+
                         if (! is_dir($path)) {
                             mkdir($path);
                             chmod($path, 0777);
@@ -79,14 +76,14 @@ class SpotController extends BaseController
                                 $dirs = scandir($path);
                                 foreach ($dirs as $dir) {
                                     if ($dir != ".." && $dir != ".") {
-                                        if (stripos($dir, $this->replaceChar($albumName)) !== false) {
+                                        if (stripos($dir, Helpers::replaceCharsFilename($albumName)) !== false) {
                                             $checkAlbumAlreadyHere = true;
                                         }
                                     }
                                 }
 
                                 if (! $checkAlbumAlreadyHere) {
-                                    $pathAlbum = $path . "/" . $artistName . " - " . $this->replaceChar($albumName);
+                                    $pathAlbum = $path . "/" . $artistName . " - " . Helpers::replaceCharsFilename($albumName);
                                     if (! is_dir($pathAlbum)) {
                                         mkdir($pathAlbum);
                                         chmod($pathAlbum, 0777);
@@ -110,6 +107,7 @@ class SpotController extends BaseController
                                             $spotDl->setPath($pathAlbum);
                                             $spotDl->setSpotifyurl($spotifyUrl);
                                             $spotDl->save();
+                                            $spots[] = $spotDl;
                                         }
                                     }
                                 }
@@ -119,6 +117,8 @@ class SpotController extends BaseController
                 }
             }
         }
+
+        return $spots;
     }
 
     private function lidarr_api($endpoint){
@@ -137,7 +137,7 @@ class SpotController extends BaseController
 
     private function spotify_api($albumName, $artistName){
         $client_id = env("SPOTIFY_CLIENT_ID");
-        $client_secret = env("SPOTIFY_SECRET_KEY");
+        $client_secret = env("SPOTIFY_CLIENT_SECRET");
 
         // L'URL de l'API d'authentification de Spotify
         $auth_url = 'https://accounts.spotify.com/api/token';
@@ -195,14 +195,5 @@ class SpotController extends BaseController
             die('Erreur cURL lors de la requête API : ' . curl_error($ch));
         }
         return $api_data;
-    }
-
-    private function replaceChar($s){
-        $chars = [":","\\","/","°"];
-        foreach ($chars as $char){
-            $s=str_replace($char,"-",$s);
-        }
-        $s=str_replace("’","'",$s);
-        return $s;
     }
 }

@@ -3,8 +3,11 @@ A web interface, to discover and listen new music artists.
 It's a mashup website with lastfm / youtube with Laravel / PHP 8.2.
 
 ## Screenshots
+Front:
+<img src="./public/images/screenshot_2.png" />
 <img src="./public/images/screenshot_1.png" />
-<img src="./public/images/screenshot_1.png" />
+Back:
+<img src="./public/images/screenshot_3.jpg" />
 
 ## Installation
 

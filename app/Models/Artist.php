@@ -137,7 +137,7 @@ class Artist extends Model
 
     public function getSpotifyAlbums() : array
     {
-        return json_decode($this->spotify_albums, true);
+        return $this->spotify_albums == null ? []  : json_decode($this->spotify_albums, true);
     }
 
     public function setSpotifyAlbums(string $spotify_albums) : void
@@ -167,7 +167,7 @@ class Artist extends Model
             $nbJoursTimestamp = $date2 - $date1;
             $nbJours = round($nbJoursTimestamp/86400,0); // 86 400 = 60*60*24
 
-            if ($nbJours>config("app.DELAY_CACHE")){
+            if ($nbJours>env("DELAY_CACHE")){
                 $bRefresh = true;
             }
         }else{
@@ -175,7 +175,6 @@ class Artist extends Model
         }
 
         if ($bRefresh or $this->getBiography() == NULL) {
-            $bSave = $this->refreshSpotifyAlbums($bSave);
             $bSave = $this->refreshBio($bSave);
         }
 
@@ -195,6 +194,9 @@ class Artist extends Model
             $bSave = $this->refreshYoutubeLives($bSave);
         }
 
+        if ($bRefresh or $this->getSpotifyAlbums() == NULL) {
+            $bSave = $this->refreshSpotifyAlbums($bSave);
+        }
         if ($bSave){
             $this->save();
         }
@@ -322,7 +324,7 @@ class Artist extends Model
         try {
             $url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" .
                 urlencode($this->getName() . " full album")
-                . "&maxResults=50&key=" . config("app.YOUTUBE_API");
+                . "&maxResults=50&key=" . env("YOUTUBE_API");
             $sBio = Helpers::getYoutubeData($url);
             if ($sBio != null && trim($sBio) != "") {
                 $sBio = json_decode($sBio, true);
@@ -351,7 +353,7 @@ class Artist extends Model
         try {
             $url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" .
                 urlencode($this->getName() . " live")
-                . "&maxResults=50&key=" . config("app.YOUTUBE_API");
+                . "&maxResults=50&key=" . env("YOUTUBE_API");
             $sBio = Helpers::getYoutubeData($url);
 
             if ($sBio != null && trim($sBio) != "") {

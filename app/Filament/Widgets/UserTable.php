@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Hash;
 
 class UserTable extends TableWidget
 {
+
+    protected static ?string $heading = 'Utilisateurs';
+
     public function table(Table $table): Table
     {
         return $table
@@ -61,7 +64,7 @@ class UserTable extends TableWidget
                              ->email()
                              ->required()
                              ->maxLength(255),
-                     ])
+                     ])->label("Nouvel utilisateur")
             ])
             ->recordActions([
                 EditAction::make()
@@ -83,8 +86,8 @@ class UserTable extends TableWidget
                              ->email()
                              ->required()
                              ->maxLength(255),
-                     ]),
-                DeleteAction::make(),
+                     ])->label("Modifier"),
+                DeleteAction::make()->label("Supprimer"),
 
             ])
             ->toolbarActions([

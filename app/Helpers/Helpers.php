@@ -344,7 +344,7 @@ class Helpers
         }
         $cachefile .= rawurlencode($filename.".gz");
 
-        if (config("app.CACHE")){
+        if (env("CACHE")){
             if (file_exists($cachefile)){
                 $cache = json_decode(gzuncompress(file_get_contents($cachefile)),true);
 
@@ -353,7 +353,7 @@ class Helpers
                 $nbJoursTimestamp = $date2 - $date1;
                 $nbJours = round($nbJoursTimestamp/86400,0); // 86 400 = 60*60*24
 
-                if ($nbJours<=config("app.DELAY_CACHE")){
+                if ($nbJours<=env("DELAY_CACHE")){
                     $r = $cache;
 
                     //On envoie le last modified uniquement lorsqu on affiche toute la page (et pas les blocs ajax)
@@ -513,5 +513,13 @@ class Helpers
             Log::error($e->getMessage());
         }
         return null;
+    }
+
+    public static function replaceCharsFilename($s): string{
+        $chars = [":","\\","/","°"];
+        foreach ($chars as $char){
+            $s = str_replace($char,"-",$s);
+        }
+        return str_replace("’","'",$s);
     }
 }

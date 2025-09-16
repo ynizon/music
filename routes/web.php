@@ -16,12 +16,16 @@ Route::post('/lastfm_login', [HomeController::class,'lastfm_login']);
 Route::get('/cron', [SpotController::class,'cron']);
 
 if (!App::runningInConsole()) {
-	$allowedIps = config("app.ONLY_IP");
-	if (Ip::all()->count() > 0){
-		foreach (Ip::all() as $ip){
-			$allowedIps[] = $ip['ip'];
-		}
-	}
+	if (env("app.RESTRICT_IP") == false){
+        $allowedIps = [$_SERVER['REMOTE_ADDR']];
+    } else {
+        $allowedIps = [];
+        if (Ip::all()->count() > 0){
+            foreach (Ip::all() as $ip){
+                $allowedIps[] = $ip['ip'];
+            }
+        }
+    }
 
 	if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedIps)){
 		Route::get('/', [HomeController::class,'index']);
@@ -38,10 +42,6 @@ if (!App::runningInConsole()) {
 		Route::get('/ajax/artist/{artist_name}', [AjaxController::class,'artist']);
 		Route::get('/ajax/artist/{artist_name}/{album_name}', [AjaxController::class,'artist_album']);
 		Route::get('/ajax/artist/{artist_name}/{album_name}/{title_name}', [AjaxController::class,'artist_album_title']);
-
-        Route::get('/spotdl', [SpotController::class,'index']);
-        Route::post('/spotdl', [SpotController::class,'index']);
-        Route::post('/spotdl/playlist', [SpotController::class,'playlist']);
 
 		Route::get('/artist', [SearchController::class,'index']);
 		Route::get('/go/{artist_name}', [SearchController::class,'go']);
