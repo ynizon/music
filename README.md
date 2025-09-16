@@ -11,7 +11,8 @@ Back:
 
 ## Installation
 
-``` git clone git@github.com:ynizon/music.git
+``` 
+git clone git@github.com:ynizon/music.git
 cd music
 cp .env.example .env (update .env with your conf)
 composer install
