@@ -54,6 +54,7 @@ class SearchController extends BaseController
 		if ($artist == null){
             $artist = new Artist(['name'=>$artist_name, 'slug' =>$artist_name]);
 		}
+
         $artist->refreshData();
 
 		//Ajout du cache

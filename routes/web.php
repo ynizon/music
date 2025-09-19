@@ -16,7 +16,7 @@ Route::post('/lastfm_login', [HomeController::class,'lastfm_login']);
 Route::get('/cron', [SpotController::class,'cron']);
 
 if (!App::runningInConsole()) {
-	if (env("app.RESTRICT_IP") == false){
+	if (env("RESTRICT_IP") == false){
         $allowedIps = [$_SERVER['REMOTE_ADDR']];
     } else {
         $allowedIps = [];

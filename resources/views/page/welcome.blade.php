@@ -4,18 +4,17 @@
 @section('content')
 <div>
     <div class="justify-content-center">
-        <?php
+        @php
 		$sTxt = "#text";
 		$sArtist = "";
 		if (isset($_COOKIE["artist"])){
 			$sArtist = $_COOKIE["artist"];
 		}
-
-		?>
+		@endphp
 		<style>
 		.menu_q{display:none;}
 		</style>
-		<div class="banner banner<?php echo rand(1,3);?>">
+		<div class="banner banner{{ rand(1,3)}}">
 			<div class="span_1_of_1">
 				<h2>Découvrez la musique <br/>que vous aimez</h2>
 				<div class="search">
@@ -23,7 +22,7 @@
 					<li id="search">
 						<input onkeypress="if (event.keyCode === 13){homeToGo();}" type="text"
 							   name="q2" id="q2" class="home_q"
-							   value="<?php if (isset($artist_name)){echo $artist_name;}?>" placeholder="Rechercher"/>
+							   value="@if (isset($artist_name)){{ $artist_name}}@endif" placeholder="Rechercher"/>
 					</li>
 					<li id="options" style="text-align:right;" onclick="homeToGo()">
 						<a href="#" style="min-width:100%;background-image:none;"><i class="fa fa-search cursor" ></i></a>
@@ -57,7 +56,7 @@
 								if ($i == 0){
 								?>
 									<br/>
-									<h3>Accéder aux concerts de vos artistes favoris</h3>		
+									<h3>Accéder aux concerts de vos artistes favoris</h3>
 									<div class="clearfix"></div>
 								<?php
 								}
@@ -66,12 +65,12 @@
 								if ($oArtist["image"][2]["#text"] != ""){
 									$sImage = $oArtist["image"][2]["#text"];
 									//$sImage = "/images/home_default.png";
-									
+
 									if ($oArtist["mbid"] != ""){
 										$sImage = Helpers::getPic($oArtist["mbid"],$sImage);
 									}
 								}
-								
+
 								?>
 								<div class="col-md-2 col_1  pointer tc"  >
 									<a href='/go/{{ str_replace("/","",str_replace("%2f","",strtolower(urlencode
@@ -83,10 +82,10 @@
 												 alt="{{ str_replace('"','\"',$oArtist["name"])}}"/>
 										</div>
 									</a>
-								</div>			
+								</div>
 								<?php
 								$i++;
-							}		
+							}
 						}
 					}
 
@@ -105,7 +104,7 @@
 									?>
 										<div class="clearfix"></div>
 										<br/>
-										<h3>Découvrez de nouveaux talents</h3>		
+										<h3>Découvrez de nouveaux talents</h3>
 										<div class="clearfix"></div>
 									<?php
 									}
@@ -128,26 +127,26 @@
 													 alt="{{ str_replace('"','\"',$oArtist->name)}}"/>
 											</div>
 										</a>
-									</div>			
+									</div>
 									<?php
 									$i++;
-								}		
+								}
 							}
 						}
 					}
 					?>
 				</div>
-				
+
 				<div class="clearfix"> </div>
 			</div>
 
 			<div class="grid_1">
 				<br />
 				<h3>Suivez les tendances du moment</h3>
-				
+
 				<div id="block_tendanceHP" >
 					<?php
-					if (isset($artistes->artists)){				
+					if (isset($artistes->artists)){
 						$i = 0;
 						foreach ($artistes->artists->artist as $oArtist){
 							if ($i < 12){
@@ -157,7 +156,7 @@
 								($oArtist->name))))}}'>
 									<h5 class='homeh5'>{{ $oArtist->name}}</h5>
 									<div class="bloc_home">
-										<?php 
+										<?php
 										$pic = $oArtist->image[2]->$sTxt;
 										if (isset($oArtist->mbid)){
 											if ($oArtist->mbid != ""){
@@ -170,15 +169,15 @@
 											 alt="{{ str_replace('"','\"',$oArtist->name)}}" />
 									</div>
 								</a>
-							</div>					
+							</div>
 							<?php
 							}
 							$i++;
 						}
 					}
 					?>
-				</div>	
-					
+				</div>
+
 				<div class="clearfix"> </div>
 			</div>
 		</div>

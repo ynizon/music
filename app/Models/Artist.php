@@ -11,10 +11,13 @@ use Illuminate\Support\Str;
 
 class Artist extends Model
 {
+    public string $realName = '';
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
         if (isset($attributes['name'])){
+            $this->realName = $attributes['name'];
             $this->setName(strtolower($attributes['name']));
         }
         if (isset($attributes['slug'])){
@@ -225,8 +228,9 @@ class Artist extends Model
     private function refreshBio($bSave = false) : bool{
         try {
             $url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="
-                . urlencode($this->getName()) . "&lang=fr&format=json&api_key="
+                . urlencode($this->realName) . "&lang=fr&format=json&api_key="
                 . config("lastfm.api_key");
+            //Le nom doit etre avec les accents
             $sBio = file_get_contents($url);
 
             $sBioFR = "";
@@ -326,6 +330,7 @@ class Artist extends Model
                 urlencode($this->getName() . " full album")
                 . "&maxResults=50&key=" . env("YOUTUBE_API");
             $sBio = Helpers::getYoutubeData($url);
+
             if ($sBio != null && trim($sBio) != "") {
                 $sBio = json_decode($sBio, true);
 

@@ -14,26 +14,38 @@ class Spotdl extends Model
         'album',
         'path',
         'spotifyurl',
+        'nbtracks',
         'todo',
         'done',
+        'avoid',
     ];
 
-    public function isDone() : boolean
+    public function isDone() : bool
     {
         return $this->done;
     }
 
-    public function setDone(boolean $done) : void
+    public function setDone(bool $done) : void
     {
         $this->done = $done;
     }
 
-    public function isTodo() : boolean
+    public function isAvoid() : bool
+    {
+        return $this->avoid;
+    }
+
+    public function setAvoid(bool $avoid) : void
+    {
+        $this->avoid = $avoid;
+    }
+
+    public function isTodo() : bool
     {
         return $this->todo;
     }
 
-    public function setTodo(boolean $todo) : void
+    public function setTodo(bool $todo) : void
     {
         $this->todo = $todo;
     }
@@ -46,6 +58,16 @@ class Spotdl extends Model
     public function setAlbum(string $album) : void
     {
         $this->album = $album;
+    }
+
+    public function getNbtracks() : string
+    {
+        return $this->nbtracks;
+    }
+
+    public function setNbtracks(int $nbtracks) : void
+    {
+        $this->nbtracks = $nbtracks;
     }
 
     public function getSpotifyurl() : string

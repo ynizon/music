@@ -516,7 +516,7 @@ class Helpers
     }
 
     public static function replaceCharsFilename($s): string{
-        $chars = [":","\\","/","°"];
+        $chars = [":","\\","/","*","°","?"];
         foreach ($chars as $char){
             $s = str_replace($char,"-",$s);
         }

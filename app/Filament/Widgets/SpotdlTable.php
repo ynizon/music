@@ -18,6 +18,8 @@ class SpotdlTable extends TableWidget
 {
     protected static ?string $heading = 'Téléchargements';
     protected static ?int $sort = 10;
+    protected static bool $isDefaultDashboardWidget = false;
+    protected int | string | array $columnSpan = 'full';
 
     public static function canView(): bool
     {
@@ -27,19 +29,23 @@ class SpotdlTable extends TableWidget
     public function table(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption(100)
+            ->paginationPageOptions([10, 25, 50, 100])
             ->query(fn (): Builder => Spotdl::query())
             ->columns([
                   TextColumn::make('artist')
                       ->searchable()
-                      ->url(fn ($record): string => $record->spotifyurl)
-                      ->openUrlInNewTab()
                       ->label('Artiste'),
                   TextColumn::make('album')
-                    ->searchable(),
+                    ->searchable()
+                    ->url(fn ($record): string => $record->spotifyurl)
+                    ->openUrlInNewTab(),
                   ToggleColumn::make("todo")
                     ->label('A faire'),
                   ToggleColumn::make("done")
                     ->label('Téléchargé'),
+                  ToggleColumn::make("avoid")
+                    ->label('A éviter'),
             ])
             ->filters([
                 //
