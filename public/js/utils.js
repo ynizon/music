@@ -166,13 +166,6 @@ function loadVideo(sVideoId, sVideoTitle){
 	$('#download').attr('href','/download?id='+sVideoId+'&name='+ sVideoTitle);
 	$('#download').css('display','inline');
 
-	//Check IP for display SONOS
-    $.ajax({
-        url: "/checkipsonos",
-    }).done(function(data) {
-        eval(data);
-    });
-
 	//Verification des licences, pour relancer la video si besoin
 	//checkYoutube(sVideoId, sVideoTitle);
 
@@ -314,7 +307,6 @@ function searchX(){
 
 	if ($("#q").val() != ""){
 		$("#loader").show();
-		updateUrl();
 		goAjax();
 	}else{
 		if ($("#title").val() != "" || $("#album").val() != ""){
@@ -389,6 +381,7 @@ function goAjax(){
 		  success: function(msg){
 				//alert(msg);
 				eval(msg);
+		        updateUrl();
 		  }
 		});
 	}else{

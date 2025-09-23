@@ -30,6 +30,7 @@ class AjaxController extends BaseController
 
 	public function artist(Request $request, $artist_name){
 		$artist_name = urldecode($artist_name);
+        $artist_name = $this->artistRepository->fixName($artist_name);
 
 		//Recup du cache
 		$cache = Helpers::getCache($artist_name);
@@ -75,6 +76,7 @@ class AjaxController extends BaseController
 
 	public function artist_album(Request $request, $artist_name, $album_name){
 		$artist_name = urldecode($artist_name);
+		$artist_name = $this->artistRepository->fixName($artist_name);
 		$album_name = urldecode($album_name);
 
 		//Recup du cache
@@ -117,6 +119,7 @@ class AjaxController extends BaseController
 
 	public function artist_album_title(Request $request, $artist_name,$album_name, $title_name){
 		$artist_name = urldecode($artist_name);
+		$artist_name = $this->artistRepository->fixName($artist_name);
 		$album_name = urldecode($album_name);
 		$title_name = urldecode($title_name);
 

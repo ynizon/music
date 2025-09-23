@@ -33,6 +33,10 @@ class SearchController extends BaseController
 
     public function go(Request $request, $artist_name){
         $artist_name = urldecode($artist_name);
+        $artist_name_recode = $this->artistRepository->fixName($artist_name);
+        if ($artist_name_recode != $artist_name){
+            header("location: /go/".$artist_name_recode);
+        }
         $artist = $this->artistRepository->getBySlug(Str::slug($artist_name));
         if ($artist == null){
             $artist = new Artist(['name'=>$artist_name, 'slug' =>$artist_name]);
@@ -44,7 +48,12 @@ class SearchController extends BaseController
 
 	public function artist(Request $request, $artist_name){
 		$artist_name = urldecode($artist_name);
+        $artist_name_recode = $this->artistRepository->fixName($artist_name);
+        if ($artist_name_recode != $artist_name){
+            return redirect("/artist/".$artist_name_recode);
+        }
 
+        
 		//Recup du cache
 		$cache = Helpers::getCache($artist_name);
 		if (isset($cache["view"])){echo $cache["view"];exit();}
@@ -65,6 +74,10 @@ class SearchController extends BaseController
 
 	public function artist_album(Request $request, $artist_name, $album_name){
 		$artist_name = urldecode($artist_name);
+		$artist_name_recode = $this->artistRepository->fixName($artist_name);
+        if ($artist_name_recode != $artist_name){
+            return redirect("/artist/".$artist_name_recode."/".$album_name);
+        }
 		$album_name = urldecode($album_name);
 
 		//Recup du cache
@@ -96,6 +109,11 @@ class SearchController extends BaseController
 
 	public function artist_album_title(Request $request, $artist_name, $album_name, $title_name){
 		$artist_name = urldecode($artist_name);
+		$artist_name = $this->artistRepository->fixName($artist_name);
+		$artist_name_recode = $this->artistRepository->fixName($artist_name);
+        if ($artist_name_recode != $artist_name){
+            return redirect("/artist/".$artist_name_recode."/".$album_name."/".$title_name);
+        }
 		$album_name = urldecode($album_name);
 		$title_name = urldecode($title_name);
 

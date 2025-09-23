@@ -13,3 +13,7 @@
         Biographie non disponible
     @endif
 </div>
+
+<script>
+    $("#q").val("{!!$artist->getName()!!}");
+</script>
