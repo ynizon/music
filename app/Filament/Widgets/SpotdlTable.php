@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Resources\Spotdls\SpotdlResource;
 use App\Models\Spotdl;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;

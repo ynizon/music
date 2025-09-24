@@ -28,6 +28,8 @@ if (!App::runningInConsole()) {
     }
 
 	if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedIps)){
+        Route::get('/save', [SpotController::class,'save']);
+
 		Route::get('/', [HomeController::class,'index']);
 		Route::get('/sitemap.xml', [HomeController::class,'sitemap']);
 		Route::get('/contact', [HomeController::class,'contact']);

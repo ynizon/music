@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Api\Lidarr;
+use App\Api\Spotify;
 use App\Helpers\Helpers;
 use App\Models\Spotdl;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -8,6 +10,7 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
 
 class SpotController extends BaseController
 {
@@ -51,28 +54,42 @@ class SpotController extends BaseController
         return view("spotdl/index", compact('spotsTodo', 'spotsDone', 'spotsCheck'));
     }
 
-//    public function playlist(Request $request){
-//        if ($request->input("playlist") != null && $request->input("spotify_url") != null ) {
-//            $spotDl = Spotdl::where("spotifyurl","=",$request->input("spotify_url") )->first();
-//
-//            if (!$spotDl) {
-//                $spotdl = new Spotdl();
-//            }
-//            $spotdl->setSpotifyurl($request->input("spotify_url"));
-//            $spotdl->setArtist("- PLAYLIST -");
-//            $spotdl->setAlbum($request->input("playlist"));
-//            $spotdl->setPath(env("PATH_MUSIC").env("PATH_PLAYLIST", "/0.Playlist/").Helpers::replaceCharsFilename($request->input
-//                             ("playlist")));
-//            $spotdl->save();
-//        }
-//        return redirect('/spotdl');
-//    }
+    public function save(Request $request){
+        if ($request->input("username") != null &&
+            $request->input("playlist") != null && $request->input("spotify_url") != null ) {
+            $username = $request->input("username");
+
+            $spotdl = Spotdl::where("spotifyurl","=",$request->input("spotify_url") )->first();
+
+            if (!$spotdl) {
+                $spotdl = new Spotdl();
+            }
+            $spotdl->setSpotifyurl($request->input("spotify_url"));
+            $spotdl->setArtist($username);
+            $spotdl->setTodo(true);
+            $spotdl->setAlbum($request->input("playlist"));
+            $spotdl->setPath(env("PATH_MUSIC")."/".$username."/") .
+                Helpers::replaceCharsFilename($request->input("playlist"));
+            if (substr($username,0,1) == "@"){
+                $spotdl->setArtist($username);
+                $username = substr($username, 1);
+                $spotdl->setPath(env("PATH_MUSIC").env("PATH_MUSIC_USER", "/Utilisateurs/")
+                    . $username . "/" . Helpers::replaceCharsFilename($request->input("playlist")));
+            }
+
+            $spotdl->save();
+        }
+        return redirect('/admin/download')->withSuccess("Téléchargement ajouté");
+    }
 
     private function checkLidarr(): array
     {
         $spots = [];
         if (env("LIDARR_URL") != "") {
-            $artists = $this->lidarr_api("/api/v1/artist");
+            $lidarr = new Lidarr();
+            $spotify = new Spotify();
+            $artists = $lidarr->get("/api/v1/artist");
+
             if ($artists != null) {
                 foreach ($artists as $artist) {
                     if ($artist['monitored']) {
@@ -81,7 +98,7 @@ class SpotController extends BaseController
                         $path = env("PATH_MUSIC") . str_replace("/music","",$artist["path"]);
 
                         //Recup des albums
-                        $albums = $this->lidarr_api(
+                        $albums = $lidarr->get(
                             "/api/v1/album?artistId=" . $artist["id"] . "&includeAllArtistAlbums=true"
                         );
                         foreach ($albums as $album) {
@@ -97,7 +114,7 @@ class SpotController extends BaseController
                                     try {
                                         $spotifyUrl = "";
                                         $nbTracks = 0;
-                                        $data = $this->spotify_search($albumName, $artistName);
+                                        $data = $spotify->search($albumName, $artistName);
 
                                         if (count($data['albums']['items']) > 0) {
                                             $spotifyUrl = $data['albums']['items'][0]["external_urls"]["spotify"];
@@ -155,74 +172,5 @@ class SpotController extends BaseController
         return $checkAlbumAlreadyHere;
     }
 
-    private function lidarr_api($endpoint){
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, env("LIDARR_URL") . $endpoint);
-        $headers = [
-            "X-Api-Key: " . env("LIDARR_API")
-        ];
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        $response = curl_exec($ch);
 
-        return json_decode($response, true);
-    }
-
-    private function spotify_search($albumName, $artistName){
-        $client_id = env("SPOTIFY_CLIENT_ID");
-        $client_secret = env("SPOTIFY_CLIENT_SECRET");
-
-        // L'URL de l'API d'authentification de Spotify
-        $auth_url = 'https://accounts.spotify.com/api/token';
-
-        $ch = curl_init();
-
-        // Préparation des données POST
-        curl_setopt($ch, CURLOPT_URL, $auth_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-            'grant_type' => 'client_credentials',
-        ]));
-
-        // Ajout de l'en-tête d'autorisation (encodage Base64)
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Basic ' . base64_encode($client_id . ':' . $client_secret),
-            'Content-Type: application/x-www-form-urlencoded'
-        ]);
-
-        // Exécution de la requête pour obtenir le jeton
-        $auth_response = curl_exec($ch);
-        $auth_data = json_decode($auth_response, true);
-
-        if (curl_errno($ch)) {
-            die('Erreur cURL lors de l\'authentification : ' . curl_error($ch));
-        }
-        if (!isset($auth_data['access_token']))
-        {
-            die('Erreur  : ' . $auth_data["error"]);
-        }
-        $access_token = $auth_data['access_token'];
-
-        if (!isset($access_token)) {
-            die('Erreur : Jeton d\'accès non reçu.');
-        }
-
-        $api_endpoint = 'https://api.spotify.com/v1/search?type=album&q=album%3A'.urlencode($albumName).'%20artist%3A'.urlencode($artistName);
-
-        curl_setopt($ch, CURLOPT_URL, $api_endpoint);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $access_token // Utilisation du jeton d'accès
-        ]);
-        curl_setopt($ch, CURLOPT_POST, false); // N'est plus une requête POST
-
-        $api_response = curl_exec($ch);
-        $api_data = json_decode($api_response, true);
-
-        if (curl_errno($ch)) {
-            die('Erreur cURL lors de la requête API : ' . curl_error($ch));
-        }
-        return $api_data;
-    }
 }

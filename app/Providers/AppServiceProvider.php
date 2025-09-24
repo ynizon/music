@@ -3,8 +3,7 @@
 namespace App\Providers;
 
 use Aerni\Spotify\Spotify;
-use App\Models\SpotifyUp;
-use App\Policies\UserPolicy;
+use App\Api\Spotify as SpotifyUp;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
