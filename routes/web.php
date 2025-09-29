@@ -28,7 +28,7 @@ if (!App::runningInConsole()) {
     }
 
 	if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedIps)){
-        Route::get('/save', [SpotController::class,'save']);
+        Route::post('/save', [SpotController::class,'save']);
 
 		Route::get('/', [HomeController::class,'index']);
 		Route::get('/sitemap.xml', [HomeController::class,'sitemap']);
@@ -54,8 +54,10 @@ if (!App::runningInConsole()) {
 		Route::get('/picture/{mbid}', [SearchController::class,'picture']);
 		Route::get('/sonos', [SearchController::class,'sonos']);
 	} else {
-        $urlsOK = ["/admin", "/admin/login","/busy", "/livewire/update", "/lastfm_login'"];
-        if (isset($_SERVER['REQUEST_URI']) && !in_array($_SERVER['REQUEST_URI'], $urlsOK)){
+        $urlsOK = ["/admin", "/admin/login","/busy", "/lastfm_login'"];
+
+        if (isset($_SERVER['REQUEST_URI']) && stripos($_SERVER['REQUEST_URI'], "livewire") === false
+            && !in_array($_SERVER['REQUEST_URI'], $urlsOK)){
 			header("location: /busy");
 			exit();
 		}

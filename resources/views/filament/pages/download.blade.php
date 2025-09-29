@@ -10,7 +10,7 @@
         <div class="fi-ta-header-ctn">
             <form class="fi-ta-header-cell" method="post" action="/save">
                 <div class="fi-sc  fi-sc-has-gap fi-grid">
-
+					@csrf
                     <div class="fi-grid-col">
                         <div class="fi-sc-component">
                             <div class="fi-fo-field fi-fo-text-input-wrp">

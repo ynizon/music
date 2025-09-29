@@ -19,7 +19,7 @@ class Download extends Page
     {
         $users = [];
         if (env("PATH_MUSIC_USER") != ""){
-            $path = env("PATH_MUSIC")."/".env("PATH_MUSIC_USER");
+            $path = env("PATH_MUSIC_USER");
             if (is_dir($path)) {
                 $dirs = scandir($path);
                 foreach ($dirs as $dir) {
@@ -32,12 +32,14 @@ class Download extends Page
         $this->users = $users;
 
         $artists = [];
-        $path = env("PATH_MUSIC");
-        if (is_dir($path)) {
-            $dirs = scandir($path);
-            foreach ($dirs as $dir) {
-                if ($dir !== '.' && $dir !== '..' && is_dir($path . "/" . $dir)) {
-                    $artists[] = $dir;
+        if (env("PATH_MUSIC") != "") {
+            $path = env("PATH_MUSIC");
+            if (is_dir($path)) {
+                $dirs = scandir($path);
+                foreach ($dirs as $dir) {
+                    if ($dir !== '.' && $dir !== '..' && is_dir($path . "/" . $dir)) {
+                        $artists[] = $dir;
+                    }
                 }
             }
         }

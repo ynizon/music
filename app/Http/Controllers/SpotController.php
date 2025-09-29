@@ -8,9 +8,9 @@ use App\Models\Spotdl;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Request;
 
 class SpotController extends BaseController
 {
@@ -41,6 +41,7 @@ class SpotController extends BaseController
                 if (!$spot->isDone()){
                     $spotsTodo[] = $spot;
                     fputs($fp, 'mkdir -p "' . $spot->getPath(). '"'.PHP_EOL);
+                    fputs($fp, 'chmod g+w  "' . $spot->getPath(). '"'.PHP_EOL);
                     $docker = env("SPOTIFY_SH")." \"".$spot->getPath()."\" \"". $spot->getSpotifyurl(). "\" 2>&1";
                     fputs($fp, $docker . PHP_EOL);
                 }
@@ -64,12 +65,13 @@ class SpotController extends BaseController
             if (!$spotdl) {
                 $spotdl = new Spotdl();
             }
+            $playlist = Helpers::replaceCharsFilename($request->input("playlist"));
             $spotdl->setSpotifyurl($request->input("spotify_url"));
             $spotdl->setArtist($username);
             $spotdl->setTodo(true);
             $spotdl->setAlbum($request->input("playlist"));
-            $spotdl->setPath(env("PATH_MUSIC")."/".$username."/") .
-                Helpers::replaceCharsFilename($request->input("playlist"));
+            $spotdl->setPath(env("PATH_MUSIC")."/".$username."/" . $playlist);
+
             if (substr($username,0,1) == "@"){
                 $spotdl->setArtist($username);
                 $username = substr($username, 1);

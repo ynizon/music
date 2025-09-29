@@ -22,7 +22,10 @@ class SpotdlTable extends TableWidget
 
     public static function canView(): bool
     {
-        return env("SPOTIFY_SH")!='' && env("LIDARR_API")!='';
+        if (request()->route()?->getName() === 'filament.admin.pages.download') {
+            return env("SPOTIFY_SH")!='' && env("LIDARR_API")!='';
+        }
+        return false;
     }
 
     public function table(Table $table): Table
