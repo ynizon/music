@@ -21,6 +21,7 @@ class SpotController extends BaseController
         $cronFile = storage_path("cron.sh");
         $fp = fopen($cronFile, "w+");
         fputs($fp, "#!/bin/bash" . PHP_EOL);
+		fputs($fp, 'mkdir -p "/tmp/_music_"'.PHP_EOL);
         $this->checkLidarr();
 
         $spotsTodo = [];
@@ -43,7 +44,7 @@ class SpotController extends BaseController
                     fputs($fp, 'mkdir -p "' . $spot->getPath(). '"'.PHP_EOL);
                     fputs($fp, 'chmod g+w  "' . $spot->getPath(). '"'.PHP_EOL);
                     $docker = env("SPOTIFY_SH")." \"".$spot->getPath()."\" \"". $spot->getSpotifyurl(). "\" 2>&1";
-                    fputs($fp, $docker . PHP_EOL);
+		    fputs($fp, $docker . PHP_EOL);
                 }
             } else {
                 $spotsCheck[] = $spot;
@@ -70,13 +71,13 @@ class SpotController extends BaseController
             $spotdl->setArtist($username);
             $spotdl->setTodo(true);
             $spotdl->setAlbum($request->input("playlist"));
-            $spotdl->setPath(env("PATH_MUSIC")."/".$username."/" . $playlist);
+            $spotdl->setPath(env("PATH_MUSIC")."/".$username . $playlist);
 
             if (substr($username,0,1) == "@"){
                 $spotdl->setArtist($username);
                 $username = substr($username, 1);
                 $spotdl->setPath(env("PATH_MUSIC").env("PATH_MUSIC_USER", "/Utilisateurs/")
-                    . $username . "/" . Helpers::replaceCharsFilename($request->input("playlist")));
+                    . $username . Helpers::replaceCharsFilename($request->input("playlist")));
             }
 
             $spotdl->save();
@@ -85,7 +86,7 @@ class SpotController extends BaseController
     }
 
     private function checkLidarr(): array
-    {
+    {	
         $spots = [];
         if (env("LIDARR_URL") != "") {
             $lidarr = new Lidarr();
@@ -96,21 +97,32 @@ class SpotController extends BaseController
                 foreach ($artists as $artist) {
                     if ($artist['monitored']) {
                         $artistName = $artist['artistName'];
-
-                        $path = env("PATH_MUSIC") . str_replace("/music","",$artist["path"]);
+						
+						$path = '';
+                        $pathAll = env("PATH_MUSIC") .$artist["path"];
+						$infos = explode("/",$pathAll);
+						$iPath = 0;
+						foreach ($infos as $info){
+							if ($iPath == count($infos)-1){
+								$info = Helpers::replaceCharsFilename($info);
+							}
+							$path .= $info."/";
+							$iPath++;
+						}
 
                         //Recup des albums
                         $albums = $lidarr->get(
                             "/api/v1/album?artistId=" . $artist["id"] . "&includeAllArtistAlbums=true"
                         );
+						
                         foreach ($albums as $album) {
                             if ($album['monitored']) {
                                 $albumName = $album['title'];
-
-                                $checkAlbumAlreadyHere = $this->checkAlbumInDir($path, Helpers::replaceCharsFilename($albumName));
+								$checkAlbumAlreadyHere = false;
+                                $this->checkAlbumInDir($checkAlbumAlreadyHere, $path, $albumName);
 
                                 if (!$checkAlbumAlreadyHere) {
-                                    $pathAlbum = $path . "/" . $artistName . " - " . Helpers::replaceCharsFilename($albumName);
+                                    $pathAlbum = $path . $artistName . " - " . Helpers::replaceCharsFilename($albumName);
 
                                     //Check sur Spotify
                                     try {
@@ -153,26 +165,44 @@ class SpotController extends BaseController
         return $spots;
     }
 
-    private function checkAlbumInDir($path, $albumName): bool{
-        $checkAlbumAlreadyHere = false;
-        if (is_dir($path)) {
-            $dirs = scandir($path);
+    private function checkAlbumInDir(&$checkAlbumAlreadyHere, $path, $albumName){        			
+		if (is_dir($path)) {			
+            $dirs = scandir($path);			
+
             foreach ($dirs as $dir) {
                 if ($dir != ".." && $dir != ".") {
-                    if (is_dir($path . "/" . $dir)){
-                        if (stripos($dir, $albumName) !== false) {
-                            $checkAlbumAlreadyHere = true;
-                        }
+                    if (is_dir($path . $dir)){
+						$dir = $this->replaceArtistCharsFilename($dir);
+						$albumName2 = $this->replaceArtistCharsFilename($albumName);
 
-                        if (!$checkAlbumAlreadyHere) {
-                            $checkAlbumAlreadyHere = $this->checkAlbumInDir($path . "/" . $dir, $albumName);
+                        if (stripos($dir, $albumName2) !== false ) {
+                            $checkAlbumAlreadyHere = true;
                         }
                     }
                 }
             }
-        }
-        return $checkAlbumAlreadyHere;
+			
+			if (!$checkAlbumAlreadyHere) {
+				foreach ($dirs as $dir) {
+					if ($dir != ".." && $dir != ".") {					
+						$this->checkAlbumInDir($checkAlbumAlreadyHere, $path . $dir ."/", $albumName);
+					}
+				}
+			}
+        }				
     }
 
-
+	private function replaceArtistCharsFilename($s){
+		$chars = [":","\\","*","°","°","?", "!","¡","+","/","."];
+        foreach ($chars as $char){
+            $s = str_replace($char," ",$s);
+        }		
+		$s = str_replace("|","I",$s);		
+		$s = str_replace("–","-",$s);
+		$s = str_replace("‐","-",$s);
+        $s = str_replace("’","'",$s);
+		$s = str_replace("   "," ",$s);
+		$s = str_replace("  "," ",$s);		
+		return trim($s);
+	}
 }

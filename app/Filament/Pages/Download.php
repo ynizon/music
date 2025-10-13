@@ -32,12 +32,12 @@ class Download extends Page
         $this->users = $users;
 
         $artists = [];
-        if (env("PATH_MUSIC") != "") {
-            $path = env("PATH_MUSIC");
+        if (env("PATH_MUSIC_ARTIST") != "") {
+            $path = env("PATH_MUSIC_ARTIST");
             if (is_dir($path)) {
                 $dirs = scandir($path);
                 foreach ($dirs as $dir) {
-                    if ($dir !== '.' && $dir !== '..' && is_dir($path . "/" . $dir)) {
+                    if (substr($dir,0,1) !== '.' && $dir !== '..' && is_dir($path . "/" . $dir)) {
                         $artists[] = $dir;
                     }
                 }
