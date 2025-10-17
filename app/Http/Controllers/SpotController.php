@@ -99,7 +99,7 @@ class SpotController extends BaseController
             if ($artists != null) {
                 foreach ($artists as $artist) {
                     if ($artist['monitored']) {
-                        $artistName = $artist['artistName'];
+                        $artistName = $this->replaceArtistPath($artist['artistName']);
 
 						$path = '';
                         $pathAll = env("PATH_MUSIC") .$artist["path"];
@@ -122,7 +122,8 @@ class SpotController extends BaseController
                             if ($album['monitored']) {
                                 $albumName = $album['title'];
 								$checkAlbumAlreadyHere = false;
-                                $this->checkAlbumInDir($checkAlbumAlreadyHere, $this->replaceArtistPath($path), $albumName);
+                                $path = $this->replaceArtistPath($path);
+                                $this->checkAlbumInDir($checkAlbumAlreadyHere, $path, $albumName);
 
                                 if (!$checkAlbumAlreadyHere) {
                                     $pathAlbum = $path . $artistName . " - " . Helpers::replaceCharsFilename($albumName);
