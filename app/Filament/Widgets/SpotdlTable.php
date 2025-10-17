@@ -2,10 +2,11 @@
 
 namespace App\Filament\Widgets;
 
+use App\Actions\Cron;
+use App\Filament\Actions\DeleteSpotAction;
 use App\Models\Spotdl;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -55,7 +56,7 @@ class SpotdlTable extends TableWidget
             ->headerActions([
             ])
             ->recordActions([
-                DeleteAction::make()->label("Supprimer"),
+                DeleteSpotAction::make()->label("Supprimer"),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -65,6 +66,9 @@ class SpotdlTable extends TableWidget
                             $records->each(function ($record) {
                                 $record->update(['todo' => 1]);
                             });
+
+                            $cron = new Cron();
+                            $cron->makeCronFile();
                         }),
                     BulkAction::make('markAsNoDone')
                         ->label('A ne pas faire')
@@ -72,6 +76,9 @@ class SpotdlTable extends TableWidget
                             $records->each(function ($record) {
                                 $record->update(['todo' => 0]);
                             });
+
+                            $cron = new Cron();
+                            $cron->makeCronFile();
                         }),
                     BulkAction::make('remove')
                         ->label('Supprimer')
@@ -80,6 +87,9 @@ class SpotdlTable extends TableWidget
                             $records->each(function ($record) {
                                 $record->delete();
                             });
+
+                            $cron = new Cron();
+                            $cron->makeCronFile();
                         })
                 ])->label('Actions globales'),
             ]);

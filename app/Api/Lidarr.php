@@ -13,7 +13,9 @@ class Lidarr{
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         $response = curl_exec($ch);
-
+		if ($response == null){
+			$response = [];
+		}
         return json_decode($response, true);
     }
 }

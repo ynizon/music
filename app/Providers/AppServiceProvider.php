@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Aerni\Spotify\Spotify;
 use App\Api\Spotify as SpotifyUp;
+use App\Models\Spotdl;
+use App\Observers\SpotdlObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,6 +30,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Spotdl::observe(SpotdlObserver::class);
     }
 }

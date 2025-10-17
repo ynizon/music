@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Spotdl;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 

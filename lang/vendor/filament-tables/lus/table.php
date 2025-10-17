@@ -23,7 +23,7 @@ return [
     'columns' => [
 
         'actions' => [
-            'label' => 'Action|Actions',
+            'label' => 'Actions|Actions',
         ],
 
         'select' => [

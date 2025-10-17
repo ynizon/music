@@ -35,7 +35,7 @@
                                                 </optgroup>
                                                 <optgroup label="Utilisateur">
                                                     @foreach ($users as $user)
-                                                        <option value="@{{$user}}">{{$user}}</option>
+                                                        <option value="@-{{$user}}">{{$user}}</option>
                                                     @endforeach
                                                 </optgroup>
                                             </select>
