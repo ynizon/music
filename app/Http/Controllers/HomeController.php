@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Helpers\Helpers;
 use App\Models\Album;
 use App\Models\Artist;
 use App\Models\Title;
@@ -36,15 +37,22 @@ class HomeController extends Controller
 		}
 
 		//Recupere le top artist
+        $artistes = [];
 		$sFile = $dir."/home.txt";
-		if ($sMaj == "" or $interval > 3){
+        if ($sMaj == "" or $interval > 3){
 			file_put_contents($dir."/maj.txt",date("Y-m-d"));
 			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".
                 config("lastfm.api_key");
-            //remplacer les images par des appels vers
-            //"https://api.discogs.com/database/search?q=cali&type=artist&token=".env("DISCOGS_API");
-            //chercher thumb
-            file_put_contents($sFile,file_get_contents($sUrl));
+
+            $content = file_get_contents($sUrl);
+            $json = json_decode($content, true);
+            foreach ($json["artists"]['artist'] as $artist) {
+                unset ($artist['image']);
+                $artist['image'] = isset($artist['mbid']) ? Helpers::getPic($artist['mbid']) : "/images/home_default.png";
+                $artistes[] = $artist;
+            }
+
+            file_put_contents($sFile,json_encode($artistes));
 		}
 		$artistes = json_decode(file_get_contents($sFile));
 

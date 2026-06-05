@@ -62,8 +62,8 @@
 								}
 
 								$sImage = "/images/home_default.png";
-								if ($oArtist["image"][2]["#text"] != ""){
-									$sImage = $oArtist["image"][2]["#text"];
+								if ($oArtist["image"] != ""){
+									$sImage = $oArtist["image"];
 									//$sImage = "/images/home_default.png";
 
 									if ($oArtist["mbid"] != ""){

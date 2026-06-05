@@ -13,8 +13,6 @@ class SonosCustomController extends Controller
     public function index()
     {
         $speakers = config('app.SONOS_SPEAKERS') ?: [
-            'Salon' => '192.168.1.15',
-            'Cuisine' => '192.168.1.14'
         ];
         return view('sonos.index', compact('speakers'));
     }
@@ -112,7 +110,7 @@ class SonosCustomController extends Controller
                     $relativePath = empty($path) ? $dirName : $path . '/' . $dirName;
 
                     $matchingM3uFile = $fullPath . '/' . $dirName . '.m3u8';
-                    $hasMatchingM3u = is_file($matchingM3uFile);
+                    $hasMatchingM3u = false;//is_file($matchingM3uFile);
                     $m3uRelativePath = $relativePath . '/' . $dirName . '.m3u8';
 
                     $folders[] = [

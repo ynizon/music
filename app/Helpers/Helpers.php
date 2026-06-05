@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\View;
 
 class Helpers
 {
-    public static function getPic($lastfm_mbid, $default): string{
+    public static function getPic($lastfm_mbid, $default = "/images/home_default.png"): string{
         $pic = "";
         try{
-            $url = "https://webservice.fanart.tv/v3/music/".$lastfm_mbid."&?api_key=".
-                env("FANART_KEY")."&format=json";
+            $url = "https://webservice.fanart.tv/v3.2/music/".$lastfm_mbid."?api_key=" . env("FANART_KEY");
 
             $options = [
                 "ssl" => [
@@ -24,20 +23,22 @@ class Helpers
             $json = file_get_contents($url, false, stream_context_create($options));
             if ($json != ""){
                 $json = json_decode($json,true);
+
                 if (isset($json["artistthumb"])){
                     if (isset($json["artistthumb"][0])){
                         $pic = $json["artistthumb"][0]["url"];
                     }
                 }
             }
+
         }catch(\Exception $e){
             //echo $e->getMessage();
         }
         if ($pic == ""){
             $pic = $default;
         }
-        if ($pic == ""){
-            $pic = "/images/default_pic.png";
+        if (is_array($pic)){
+            $pic = $pic[1]['#text'];
         }
         return $pic;
     }

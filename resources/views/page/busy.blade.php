@@ -56,21 +56,21 @@
 								if ($i == 0){
 								?>
 									<br/>
-									<h3>Accéder aux concerts de vos artistes favoris</h3>		
+									<h3>Accéder aux concerts de vos artistes favoris</h3>
 									<div class="clearfix"></div>
 								<?php
 								}
 
-								$sImage = "/images/home_default.png";
+								$sImage = ²;
 								if ($oArtist["image"][2]["#text"] != ""){
 									$sImage = $oArtist["image"][2]["#text"];
 									//$sImage = "/images/home_default.png";
-									
+
 									if ($oArtist["mbid"] != ""){
 										$sImage = Helpers::getPic($oArtist["mbid"],$sImage);
 									}
 								}
-								
+
 								?>
 								<div class="col-md-2 col_1  pointer tc"  >
 									<a href='/go/{{ str_replace("/","",str_replace("%2f","",strtolower(urlencode
@@ -82,10 +82,10 @@
 											}}"/>
 										</div>
 									</a>
-								</div>			
+								</div>
 								<?php
 								$i++;
-							}		
+							}
 						}
 					}
 
@@ -104,7 +104,7 @@
 									?>
 										<div class="clearfix"></div>
 										<br/>
-										<h3>Découvrez de nouveaux talents</h3>		
+										<h3>Découvrez de nouveaux talents</h3>
 										<div class="clearfix"></div>
 									<?php
 									}
@@ -127,26 +127,26 @@
 												$oArtist->name)}}"/>
 											</div>
 										</a>
-									</div>			
+									</div>
 									<?php
 									$i++;
-								}		
+								}
 							}
 						}
 					}
 					?>
 				</div>
-				
+
 				<div class="clearfix"> </div>
 			</div>
 
 			<div class="grid_1">
 				<br />
 				<h3>Suivez les tendances du moment</h3>
-				
+
 				<div id="block_tendanceHP" >
 					<?php
-					if (isset($artistes->artists)){				
+					if (isset($artistes->artists)){
 						$i = 0;
 						foreach ($artistes->artists->artist as $oArtist){
 							if ($i < 12){
@@ -156,7 +156,7 @@
 								($oArtist->name))))}}'>
 									<h5 class='homeh5'>{{ $oArtist->name}}</h5>
 									<div class="bloc_home">
-										<?php 
+										<?php
 										$pic = $oArtist->image[2]->$sTxt;
 										if (isset($oArtist->mbid)) {
                                             if ($oArtist->mbid != "") {
@@ -168,15 +168,15 @@
 											 class="img-responsive" alt="{{ str_replace('"','\"',$oArtist->name)}}" />
 									</div>
 								</a>
-							</div>					
+							</div>
 							<?php
 							}
 							$i++;
 						}
 					}
 					?>
-				</div>	
-					
+				</div>
+
 				<div class="clearfix"> </div>
 			</div>
 		</div>
