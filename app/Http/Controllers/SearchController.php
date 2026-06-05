@@ -6,6 +6,7 @@ use App\Models\Album;
 use App\Models\Artist;
 use App\Models\Spotdl;
 use App\Models\Title;
+use App\Providers\HelperServiceProvider;
 use App\Repositories\AlbumRepository;
 use App\Repositories\ArtistRepository;
 use App\Repositories\TitleRepository;
@@ -30,7 +31,6 @@ class SearchController extends BaseController
 	public function index(){
 		return redirect('/');
 	}
-
     public function go(Request $request, $artist_name){
         $artist_name = urldecode($artist_name);
         $artist_name_recode = $this->artistRepository->fixName($artist_name);
@@ -53,7 +53,7 @@ class SearchController extends BaseController
             return redirect("/artist/".$artist_name_recode);
         }
 
-        
+
 		//Recup du cache
 		$cache = Helpers::getCache($artist_name);
 		if (isset($cache["view"])){echo $cache["view"];exit();}
@@ -164,4 +164,37 @@ class SearchController extends BaseController
 		$url = Helpers::getPic($mbid,$request->input('default'));
 		echo file_get_contents($url, false, stream_context_create($arrContextOptions));
 	}
+
+    public function franceinfo(Request $request){
+        $get = strtolower($request->input("get"));
+
+        $speakers = config('app.SONOS_SPEAKERS') ?: ['Salon' => '192.168.1.15'];
+        $ip = array_values($speakers)[0] ?? '192.168.1.15';
+
+        $sonos = new SonosPHPController($ip);
+        $sonos->RemoveAllTracksFromQueue();
+        $sonos->Stop();
+
+        switch ($get)
+        {
+            case "muse":
+                $file = config("app.NAS_MUSIC_FOLDER", "") . "/Muse/Muse.m3u";
+                $file = str_replace("&","%26", $file);
+                $sonos->AddURIToQueue("x-file-cifs:" . $file);
+            case "bon jovi":
+                $file = config("app.NAS_MUSIC_FOLDER", "") . "/Bon Jovi/Bon Jovi.m3u";
+                $file = str_replace("&","%26", $file);
+                $sonos->AddURIToQueue("x-file-cifs:" . $file);
+            case "fatals picards":
+                $file = config("app.NAS_MUSIC_FOLDER", "") . "/Les Fatals Picards/Fatals Picards.m3u";
+                $file = str_replace("&","%26", $file);
+                $sonos->AddURIToQueue("x-file-cifs:" . $file);
+            case "franceinfo":
+                $file = 'http://icecast.radiofrance.fr/franceinfo-midfi.mp3';
+                $sonos->AddURIToQueue("x-rincon-mp3radio://".str_replace("http://","",$file));
+            default:
+        }
+
+        $sonos->Play();
+    }
 }

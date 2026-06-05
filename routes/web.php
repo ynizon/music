@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AjaxController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SpotController;
+use App\Http\Controllers\SonosCustomController;
 
 Route::get('/busy', [HomeController::class,'busy']);
 Route::get('/home', [HomeController::class,'index'])->name('home');
@@ -52,7 +53,13 @@ if (!App::runningInConsole()) {
 		Route::get('/artist/{artist_name}/{album_name}/{title_name}', [SearchController::class,'artist_album_title']);
 
 		Route::get('/picture/{mbid}', [SearchController::class,'picture']);
-		Route::get('/sonos', [SearchController::class,'sonos']);
+		Route::get('/sonos', [SonosCustomController::class, 'index']);
+		Route::get('/sonos/autocomplete', [SonosCustomController::class, 'autocomplete']);
+		Route::get('/sonos/albums', [SonosCustomController::class, 'albums']);
+		Route::post('/sonos/play', [SonosCustomController::class, 'play']);
+		Route::post('/sonos/control', [SonosCustomController::class, 'control']);
+
+        Route::get('/franceinfo', [SearchController::class,'franceinfo']);
 	} else {
         $urlsOK = ["/admin", "/admin/login","/busy", "/lastfm_login'"];
 

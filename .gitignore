@@ -28,3 +28,6 @@ Thumbs.db
 /public/storage
 /storage/*.key
 /storage/cache/
+/storage/home.txt
+/storage/maj.txt
+/storage/download_spotify.sh

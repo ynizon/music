@@ -11,6 +11,7 @@ class Cron
         $cronFile = storage_path("cron.sh");
         $fp = fopen($cronFile, "w+");
         fputs($fp, "#!/bin/bash" . PHP_EOL);
+	fputs($fp, "wget ".env("APP_URL")."/cron" . PHP_EOL);
         $spots = Spotdl::where("avoid","=", false)->get();
         foreach ($spots as $spot){
             if ($spot->isTodo() && !$spot->isDone()){

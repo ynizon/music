@@ -1,6 +1,11 @@
 <?php
 
 return [
+    "MUSIC_FOLDER"=>env("MUSIC_FOLDER",""),
+    "NAS_MUSIC_FOLDER"=>env("NAS_MUSIC_FOLDER",""),
+    "NFS_NAS"=>env("NFS_NAS",""),
+    "SONOS_SPEAKERS"=>json_decode(env("SONOS_SPEAKERS", '{"Salon": "192.168.1.15", "Cuisine": "192.168.1.14"}'), true),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

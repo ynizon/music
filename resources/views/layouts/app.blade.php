@@ -171,6 +171,11 @@ use App\Models\Title;
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					</li>
 
+					@if(\Auth::check() || \Cookie::get('lastfm_login') !== "")
+                        <li class="nav-item">
+                            <a class="nav-link" href="/sonos">Sonos</a>
+                        </li>
+					@endif
 					<li class="nav-item">
 						<a class="nav-link" href="/lastfm_login">Mon compte</a>
 					</li>

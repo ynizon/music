@@ -41,6 +41,9 @@ class HomeController extends Controller
 			file_put_contents($dir."/maj.txt",date("Y-m-d"));
 			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".
                 config("lastfm.api_key");
+            //remplacer les images par des appels vers
+            //"https://api.discogs.com/database/search?q=cali&type=artist&token=".env("DISCOGS_API");
+            //chercher thumb
             file_put_contents($sFile,file_get_contents($sUrl));
 		}
 		$artistes = json_decode(file_get_contents($sFile));
@@ -106,8 +109,7 @@ class HomeController extends Controller
 
 		if ($request->input("lastfm_login") != ""){
 			$lastfm_login = $request->input("lastfm_login");
-			Cookie::make("lastfm_login", $lastfm_login, 1314000);
-
+            Cookie::queue("lastfm_login", $lastfm_login, 1314000);
 			return redirect('/');
 		}else{
 			return view('lastfm/index', compact('lastfm_login'));
