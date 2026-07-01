@@ -92,6 +92,11 @@
                         <input type="range" min="0" max="100" class="volume-slider" id="volume-range" value="20">
                         <div class="volume-value" id="volume-lbl">20</div>
                     </div>
+
+                    <div style="width:100%;display:flex;text-align: center">
+                        <img src=""
+                             alt="Cover" id="cover" style="height:250px;margin:auto;padding-top:20px;display:none">
+                    </div>
                 </div>
             </div>
         </div>
@@ -113,6 +118,7 @@
                 }
             });
 
+            document.getElementById('artist-search').focus();
             // State variables
             let selectedIp = "{{ array_values($speakers)[0] ?? '' }}";
             let currentArtist = "";
@@ -172,9 +178,11 @@
                                 const item = $("<li class='music-item'></li>")
                                     .data("path", m3u.path)
                                     .data("type", "m3u8")
+                                    .data("cover", m3u.cover)
                                     .append($("<div class='music-item-info'><i class='fa fa-list-ul'></i><span>" + label + "</span></div>"))
                                     .append($("<i class='fa fa-play-circle music-item-action'></i>"));
                                 listM3u.append(item);
+                                console.log(m3u);
                             });
                         } else {
                             $("#section-m3u").hide();
@@ -193,6 +201,7 @@
                             const backItem = $("<li class='music-item parent-dir-item'></li>")
                                 .data("path", parentPath)
                                 .data("type", "back")
+                                .data("cover", "")
                                 .append($("<div class='music-item-info'><i class='fa fa-arrow-left'></i><span style='font-weight: bold;'>.. (Retour)</span></div>"));
                             listFolders.append(backItem);
                         }
@@ -205,6 +214,7 @@
                                     .data("path", folder.path)
                                     .data("type", "folder")
                                     .data("has-m3u", folder.has_matching_m3u)
+                                    .data("cover", folder.cover)
                                     .data("m3u-path", folder.m3u_path)
                                     .append($("<div class='music-item-info'><i class='fa fa-folder-open'></i><span>" + label + "</span></div>"))
                                     .append($("<i class='fa fa-play-circle music-item-action'></i>"));
@@ -222,14 +232,29 @@
             }
 
             // Click handler to navigate folders or play music
+            $(document).on("mouseover", ".music-item", function(e) {
+                if( $(this).data("cover") !== '')
+                {
+                    document.getElementById('cover').src = $(this).data("cover");
+                    $("#cover").show();
+                }
+            });
+
             $(document).on("click", ".music-item", function(e) {
                 const path = $(this).data("path");
                 const type = $(this).data("type");
                 const hasM3u = $(this).data("has-m3u");
+                const cover = $(this).data("cover");
                 const m3uPath = $(this).data("m3u-path");
 
                 // If play action clicked
                 if ($(e.target).hasClass("music-item-action") || $(e.target).parent().hasClass("music-item-action")) {
+                    if( cover !== '')
+                    {
+                        document.getElementById('cover').src = cover;
+                        $("#cover").show();
+                    }
+
                     if (type === "folder" && hasM3u) {
                         playMusic("m3u", m3uPath);
                     } else {

@@ -60,7 +60,11 @@ class HomeController extends Controller
 		$lastfm_login = Cookie::get('lastfm_login');
 		if ($lastfm_login != ""){
 			$lastfm = new Lastfm(new Client(), config("lastfm.api_key"));
-			$preferences = $lastfm->userTopArtists($lastfm_login)->get();
+			$preferencesTmp = $lastfm->userTopArtists($lastfm_login)->get();
+            foreach ($preferencesTmp as $preference){
+                $preference['image'] = Helpers::getPic($preference['mbid']);
+                $preferences[] = $preference;
+            }
 		}
 
 		//Et si on en trouve pas alors on prend les artistes smiliaires aux dernieres recherches

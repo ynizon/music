@@ -11,34 +11,51 @@ class Helpers
     public static function getPic($lastfm_mbid, $default = "/images/home_default.png"): string{
         $pic = "";
         try{
-            $url = "https://webservice.fanart.tv/v3.2/music/".$lastfm_mbid."?api_key=" . env("FANART_KEY");
+            $fileCache = public_path("images/cache") . "/" . $lastfm_mbid . ".jpg";
 
-            $options = [
-                "ssl" => [
-                    "verify_peer"=>false,
-                    "verify_peer_name"=>false
-                ]
-            ];
+            if (file_exists($fileCache))
+            {
+                $pic = "/images/cache/" . $lastfm_mbid . ".jpg";;
+            } else {
+                $url = "https://webservice.fanart.tv/v3.2/music/" . $lastfm_mbid . "?api_key=" . env("FANART_KEY");
 
-            $json = file_get_contents($url, false, stream_context_create($options));
-            if ($json != ""){
-                $json = json_decode($json,true);
+                $options = [
+                    "ssl" => [
+                        "verify_peer" => false,
+                        "verify_peer_name" => false
+                    ]
+                ];
 
-                if (isset($json["artistthumb"])){
-                    if (isset($json["artistthumb"][0])){
-                        $pic = $json["artistthumb"][0]["url"];
+                $json = file_get_contents($url, false, stream_context_create($options));
+                if ($json !== "") {
+                    $json = json_decode($json, true);
+
+                    if (isset($json["artistthumb"])) {
+                        if (isset($json["artistthumb"][0])) {
+                            $pic = $json["artistthumb"][0]["url"];
+                        }
+                    }
+
+                    if ($pic === "" && isset($json["albums"][0]["albumcover"][0]["url"])) {
+                        $pic = $json["albums"][0]["albumcover"][0]["url"];
                     }
                 }
-            }
 
+                if (is_array($pic)){
+                    $pic = $pic[1]['#text'];
+                }
+                if ($pic !== "")
+                {
+                    file_put_contents($fileCache, file_get_contents($pic));
+                    $pic = "images/cache/" . $lastfm_mbid . ".jpg";
+                }
+            }
         }catch(\Exception $e){
-            //echo $e->getMessage();
+           // echo $e->getMessage();
         }
+
         if ($pic == ""){
             $pic = $default;
-        }
-        if (is_array($pic)){
-            $pic = $pic[1]['#text'];
         }
         return $pic;
     }

@@ -112,8 +112,10 @@ class SonosCustomController extends Controller
                     $matchingM3uFile = $fullPath . '/' . $dirName . '.m3u8';
                     $hasMatchingM3u = false;//is_file($matchingM3uFile);
                     $m3uRelativePath = $relativePath . '/' . $dirName . '.m3u8';
+                    $coverFilename = $this->findCoverImage($fullPath);
 
                     $folders[] = [
+                        'cover' => $coverFilename === '' ? '' : "data:image/jpeg;base64," . base64_encode(file_get_contents($coverFilename)),
                         'path' => $relativePath,
                         'name' => $dirName,
                         'has_matching_m3u' => $hasMatchingM3u,
@@ -123,7 +125,9 @@ class SonosCustomController extends Controller
 
                 foreach ($m3uNames as $m3uName) {
                     $relativePath = empty($path) ? $m3uName : $path . '/' . $m3uName;
+                    $coverFilename = $this->findCoverImage($targetFolder);
                     $m3us[] = [
+                        'cover' => $coverFilename === '' ? '' : "data:image/jpeg;base64," . base64_encode(file_get_contents($coverFilename)),
                         'path' => $relativePath,
                         'name' => $m3uName
                     ];
@@ -162,22 +166,38 @@ class SonosCustomController extends Controller
             $sonos->RemoveAllTracksFromQueue();
             $sonos->Stop();
 
+            // Full path to folder (local for scanning, then mapped to NAS path)
+            $localFolder = str_replace('\\', '/', config("app.MUSIC_FOLDER") ?: "/music/");
+            $localFolderPath = $localFolder . '/' . $artist;
+			$init = false;
+            if (!empty($path)) {
+                $localFolderPath .= '/' . $path;
+            }
+
             if ($type === 'm3u8') {
                 // Full path to M3U
                 $m3uPath = $baseFolder . '/' . $artist;
                 if (!empty($path)) {
                     $m3uPath .= '/' . $path;
                 }
-                $file = str_replace('&', '%26', $m3uPath);
-                $sonos->AddURIToQueue("x-file-cifs:" . $file);
-            } else {
-                // Full path to folder (local for scanning, then mapped to NAS path)
-                $localFolder = str_replace('\\', '/', config("app.MUSIC_FOLDER") ?: "/music/");
-                $localFolderPath = $localFolder . '/' . $artist;
-                if (!empty($path)) {
-                    $localFolderPath .= '/' . $path;
-                }
 
+                $file = str_replace($baseFolder, $localFolder, $m3uPath);
+                $content = file_get_contents($file);
+                foreach (explode("\n", $content) as $line) {
+                    $line = trim($line);
+                    if (!empty($line) && strpos($line, '#EXT') === false) {
+                        $nasAudioFile = $baseFolder . '/' . $artist."/".$line;
+                        $file = str_replace('&', '%26', $nasAudioFile);
+                        $file = utf8_decode($file);//Fix accent
+						if (!$init){							
+							$sonos->SetQueue("x-file-cifs:" . $file);
+							$init = true;
+						} else {
+							$sonos->AddURIToQueue("x-file-cifs:" . $file);
+						}
+                    }
+                }
+            } else {
                 $audioFiles = $this->getAudioFiles($localFolderPath);
                 if (empty($audioFiles)) {
                     return response()->json(['error' => 'Aucune musique trouvée dans ce dossier'], 404);
@@ -186,7 +206,13 @@ class SonosCustomController extends Controller
                 foreach ($audioFiles as $audioFile) {
                     $nasAudioFile = str_replace($localFolder, $baseFolder, $audioFile);
                     $file = str_replace('&', '%26', $nasAudioFile);
-                    $sonos->AddURIToQueue("x-file-cifs:" . $file);
+                    $file = utf8_decode($file);//Fix accent
+					if (!$init){							
+						$sonos->SetQueue("x-file-cifs:" . $file);
+						$init = true;
+					} else {
+						$sonos->AddURIToQueue("x-file-cifs:" . $file);
+					}
                 }
             }
 
@@ -281,5 +307,40 @@ class SonosCustomController extends Controller
 
         natcasesort($audioFiles);
         return array_values($audioFiles);
+    }
+
+    /**
+     * Recherche la meilleure image de couverture dans un dossier.
+     * Priorité à 'cover.jpg', sinon le premier .jpg/.jpeg trouvé.
+     *
+     * @param string $absolutePath Le chemin absolu du dossier sur le serveur
+     * @return string Le nom du fichier trouvé (ex: 'cover.jpg' ou 'photo.jpg') ou null
+     */
+    function findCoverImage($absolutePath) {
+        if (!is_dir($absolutePath)) {
+            return '';
+        }
+
+        // 1. Priorité absolue : vérifier si cover.jpg existe
+        if (is_file($absolutePath . '/cover.jpg')) {
+            return $absolutePath . '/cover.jpg';
+        }
+
+        // 2. Repli : scanner le dossier pour trouver le premier fichier .jpg ou .jpeg
+        $files = scandir($absolutePath);
+        foreach ($files as $file) {
+            // On ignore les dossiers parents/courants (. et ..)
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            // On vérifie l'extension du fichier (insensible à la casse)
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if ($extension === 'jpg' || $extension === 'jpeg') {
+                return $absolutePath . '/'. $file; // On a trouvé le premier JPG, on s'arrête ici
+            }
+        }
+
+        return '';
     }
 }
