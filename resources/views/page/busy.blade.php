@@ -18,7 +18,7 @@
 		<div class="banner banner{{ rand(1,3)}}">
 			<div class="span_1_of_1">
 				<h2>Désolé, ce site est actuellement surchargé<br/>merci de monter le votre, <a href='https://github
-				.com/ynizon/music'>grâce aux sources</a>,<br/> ou <a href="/admin">d'ajouter votre IP ({{$_SERVER['REMOTE_ADDR']}}).</a></h2>
+				.com/ynizon/music'>grâce aux sources</a>,<br/> ou de <a href="/admin/login">vous connecter</a> (votre IP : {{$_SERVER['REMOTE_ADDR']}}).</h2>
 				<div class="search">
 				  <ul class="nav1">
 					<li id="search">

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    "RESTRICT_IP"=>(bool) env("RESTRICT_IP", false),
     "MUSIC_FOLDER"=>env("MUSIC_FOLDER",""),
     "NAS_MUSIC_FOLDER"=>env("NAS_MUSIC_FOLDER",""),
     "NFS_NAS"=>env("NFS_NAS",""),

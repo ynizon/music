@@ -5,14 +5,12 @@ use App\Helpers\Helpers;
 use App\Models\Album;
 use App\Models\Artist;
 use App\Models\Title;
-use App\Models\User;
 use App\Repositories\AlbumRepository;
 use App\Repositories\ArtistRepository;
 use App\Repositories\TitleRepository;
 use Barryvanveen\Lastfm\Lastfm;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 
 class HomeController extends Controller
@@ -123,12 +121,8 @@ class HomeController extends Controller
 
 		if ($request->input("lastfm_login") != "") {
             $lastfm_login = $request->input("lastfm_login");
+            // Pseudo last.fm mémorisé pour l'accueil uniquement : la connexion au site passe par /admin/login
             Cookie::queue("lastfm_login", $lastfm_login, 1314000);
-            $user = User::where("name", "=", $lastfm_login)->first();
-            if ($user) {
-                Auth::login($user);
-                request()->session()->regenerate();
-            }
 			return redirect('/');
 		}else{
 			return view('lastfm/index', compact('lastfm_login'));
