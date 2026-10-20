@@ -10,8 +10,8 @@ services:
       # Reverse proxy autorisé à transmettre l'IP du client (réseau Docker + localhost)
       TRUSTED_PROXIES: "172.16.0.0/12 127.0.0.1"
     volumes:
-      # Données du site : .env, storage/, database/database.sqlite, public/images/cache/
-      - /share/CACHEDEV1_DATA/nas/web/music.gameandme.fr:/data
+      # Tout le site (code + .env, storage, database) : modifiable depuis le NAS
+      - /share/CACHEDEV1_DATA/nas/web/music.gameandme.fr:/var/www/html
       # Partage nas monté aux mêmes chemins que sur l'hôte (MUSIC_FOLDER, PATH_MUSIC*, spotdl)
       - /share/CACHEDEV1_DATA/nas:/share/CACHEDEV1_DATA/nas
       - /share/CACHEDEV1_DATA/nas:/share/nas

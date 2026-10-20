@@ -13,19 +13,31 @@ if [ -S /var/run/docker.sock ]; then
     usermod -aG "$sock_group" www-data
 fi
 
-# Données du site dans /data (dossier du NAS) : .env, storage, database, public/images/cache
-mkdir -p /data/storage/app/download /data/storage/framework/cache /data/storage/framework/sessions \
-    /data/storage/framework/views /data/storage/logs /data/database /data/public/images/cache
-[ -f /data/.env ] || echo "ATTENTION : /data/.env introuvable"
-ln -sfn /data/.env .env
-rm -rf storage public/images/cache
-ln -s /data/storage storage
-ln -s /data/public/images/cache public/images/cache
+# Le site (code + données) est dans /var/www/html, monté depuis le NAS.
+# Premier démarrage : on y copie le code de l'image sans écraser .env, storage, database...
+if [ ! -f artisan ]; then
+    echo "Code absent : copie du code de l'image dans /var/www/html"
+    cp -an /opt/app/. /var/www/html/ || true
+fi
+[ -f .env ] || echo "ATTENTION : /var/www/html/.env introuvable"
+
+# vendor absent ou composer.lock modifié : réinstallation des dépendances
+if [ ! -f vendor/composer/installed.json ] || [ composer.lock -nt vendor/composer/installed.json ]; then
+    composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+    touch vendor/composer/installed.json
+    rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
+fi
 
 # Les dossiers du NAS peuvent appartenir à un autre utilisateur
-for dir in /data/storage /data/database /data/public/images/cache bootstrap/cache; do
+mkdir -p storage/app/download storage/framework/cache storage/framework/sessions \
+    storage/framework/views storage/logs bootstrap/cache database public/images/cache
+for dir in storage bootstrap/cache database public/images/cache; do
     find "$dir" ! -user www-data -exec chown www-data:www-data {} +
 done
+# Sitemaps écrits à la racine de public
+find public -maxdepth 1 ! -user www-data -exec chown www-data:www-data {} +
+
+[ -f bootstrap/cache/packages.php ] || su -s /bin/sh www-data -c "php artisan package:discover"
 
 if [ "$RUN_MIGRATIONS" = "true" ] && [ -f .env ]; then
     su -s /bin/sh www-data -c "php artisan migrate --force" || echo "Migrations en échec, voir les logs ci-dessus"

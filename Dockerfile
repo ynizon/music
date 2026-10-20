@@ -24,9 +24,12 @@ RUN chmod +x /usr/local/bin/app-entrypoint /usr/local/bin/download_spotify.sh
 
 ENV TRUSTED_PROXIES="172.16.0.0/12 127.0.0.1" \
     RUN_MIGRATIONS=true \
-    COMPOSER_HOME=/tmp/composer
+    OPCACHE_VALIDATE_TIMESTAMPS=1 \
+    COMPOSER_HOME=/tmp/composer \
+    COMPOSER_ALLOW_SUPERUSER=1
 
-WORKDIR /var/www/html
+# Code de référence, copié dans /var/www/html (dossier du NAS) au premier démarrage
+WORKDIR /opt/app
 
 # Dépendances d'abord pour profiter du cache de build
 COPY composer.json composer.lock ./
@@ -37,8 +40,9 @@ COPY . .
 RUN mkdir -p storage/app/download storage/framework/cache storage/framework/sessions \
         storage/framework/views storage/logs bootstrap/cache public/images/cache \
     && composer dump-autoload --optimize --no-dev --no-scripts \
-    && php artisan package:discover --ansi \
-    && chown -R www-data:www-data storage bootstrap/cache public
+    && php artisan package:discover --ansi
+
+WORKDIR /var/www/html
 
 ENTRYPOINT ["app-entrypoint"]
 CMD ["apache2-foreground"]
