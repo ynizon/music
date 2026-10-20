@@ -14,6 +14,9 @@
                     <div class="search-container">
                         <i class="fa fa-search"></i>
                         <input type="text" id="artist-search" placeholder="Rechercher un artiste (ex: Muse, ACDC...)" autocomplete="off">
+                        <button type="button" class="voice-btn" id="btn-voice" title="Dire le nom d'un artiste pour le lancer" style="display:none;">
+                            <i class="fa fa-microphone"></i>
+                        </button>
                     </div>
 
                     <!-- Favorites Section (visible uniquement si connecté et favoris existants) -->
@@ -336,8 +339,139 @@
 
             // ── MEDIA LOADING ─────────────────────────────────────────
 
+            // ── RECHERCHE VOCALE ──────────────────────────────────────
+            // "Muse" ou "joue Muse" : trouve l'artiste dans la bibliothèque et lance sa playlist
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let allArtists = null;
+
+            if (SpeechRecognition) {
+                $("#btn-voice").show();
+            }
+
+            $("#btn-voice").click(function() {
+                const recognition = new SpeechRecognition();
+                recognition.lang = "fr-FR";
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 5;
+
+                recognition.onstart = function() {
+                    $("#btn-voice").addClass("listening");
+                    showToast("Je vous écoute...", "info");
+                };
+                recognition.onend = function() {
+                    $("#btn-voice").removeClass("listening");
+                };
+                recognition.onerror = function(event) {
+                    const messages = {
+                        "not-allowed": "Accès au micro refusé.",
+                        "no-speech": "Je n'ai rien entendu.",
+                        "network": "Reconnaissance vocale indisponible (réseau)."
+                    };
+                    showToast(messages[event.error] || "Erreur de reconnaissance vocale.", "error");
+                };
+                recognition.onresult = function(event) {
+                    const transcripts = Array.from(event.results[0]).map(function(alt) { return alt.transcript; });
+                    playSpokenArtist(transcripts);
+                };
+
+                recognition.start();
+            });
+
+            function normalizeName(name) {
+                return name.toLowerCase()
+                    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+                    .replace(/[^a-z0-9]/g, "");
+            }
+
+            // Retire "joue", "lance du", "mets de la"... en début de phrase
+            function stripCommand(text) {
+                return text.trim().replace(/^(joue|jouer|lance|lancer|mets|mettre|ecoute|écoute|play)\s+(du |de la |de l'|des |de )?/i, "");
+            }
+
+            function levenshtein(a, b) {
+                const row = Array.from({ length: b.length + 1 }, function(_, j) { return j; });
+                for (let i = 1; i <= a.length; i++) {
+                    let previous = row[0];
+                    row[0] = i;
+                    for (let j = 1; j <= b.length; j++) {
+                        const current = row[j];
+                        row[j] = Math.min(row[j] + 1, row[j - 1] + 1, previous + (a[i - 1] === b[j - 1] ? 0 : 1));
+                        previous = current;
+                    }
+                }
+                return row[b.length];
+            }
+
+            // Meilleur artiste de la bibliothèque pour les transcriptions proposées, ou null
+            function findArtist(transcripts, artists) {
+                const candidates = transcripts.map(function(t) { return normalizeName(stripCommand(t)); })
+                    .filter(function(t) { return t !== ""; });
+                // Clé normalisée, et une variante sans article ("Les Fatals Picards" -> "fatalspicards")
+                const names = artists.map(function(a) {
+                    return {
+                        name: a,
+                        keys: [normalizeName(a), normalizeName(a.replace(/^(les|le|la|l'|the)\s+/i, ""))]
+                    };
+                });
+
+                for (const spoken of candidates) {
+                    const exact = names.find(function(n) { return n.keys.includes(spoken); });
+                    if (exact) return exact.name;
+                }
+                for (const spoken of candidates) {
+                    const partial = names.find(function(n) {
+                        return spoken.length >= 3 && n.keys.some(function(key) {
+                            return key.includes(spoken) || (key.length >= 3 && spoken.includes(key));
+                        });
+                    });
+                    if (partial) return partial.name;
+                }
+
+                let best = null;
+                let bestScore = 0;
+                for (const spoken of candidates) {
+                    for (const n of names) {
+                        for (const key of n.keys) {
+                            const score = 1 - levenshtein(spoken, key) / Math.max(spoken.length, key.length);
+                            if (score > bestScore) {
+                                bestScore = score;
+                                best = n.name;
+                            }
+                        }
+                    }
+                }
+                return bestScore >= 0.75 ? best : null;
+            }
+
+            function playSpokenArtist(transcripts) {
+                const loadArtists = allArtists
+                    ? $.Deferred().resolve(allArtists)
+                    : $.getJSON("/sonos/autocomplete", { term: "" }).then(function(data) { return allArtists = data; });
+
+                loadArtists.then(function(artists) {
+                    const artist = findArtist(transcripts, artists);
+                    if (!artist) {
+                        showToast("Aucun artiste trouvé pour « " + transcripts[0] + " »", "error");
+                        return;
+                    }
+
+                    $("#artist-search").val(artist);
+                    loadArtistMedia(artist, "", function(data) {
+                        // Playlist au nom de l'artiste (ex: Muse.m3u8), sinon toute la discographie
+                        const playlist = (data.m3us || []).find(function(m) {
+                            return normalizeName(m.name.replace(/\.m3u8?$/i, "")) === normalizeName(artist);
+                        });
+                        if (playlist) {
+                            playMusic("m3u8", playlist.path);
+                        } else {
+                            playMusic("folder", "");
+                        }
+                    });
+                });
+            }
+
             // Load media (folders + M3Us) for selected artist
-            function loadArtistMedia(artist, subpath = "") {
+            function loadArtistMedia(artist, subpath = "", onLoaded = null) {
                 currentArtist = artist;
                 currentSubPath = subpath;
                 $("#placeholder-search-text").hide();
@@ -410,6 +544,10 @@
                             });
                         } else if (!currentSubPath) {
                             $("#section-folders").hide();
+                        }
+
+                        if (onLoaded) {
+                            onLoaded(data);
                         }
                     },
                     error: function(xhr) {
