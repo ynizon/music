@@ -24,3 +24,13 @@
 
 </IfModule>
 
+# Cache navigateur des fichiers statiques (les réponses PHP gardent leurs propres en-têtes)
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=86400"
+    </FilesMatch>
+    <FilesMatch "\.(png|jpe?g|gif|svg|ico|webp|woff2?|ttf|eot)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+</IfModule>
+

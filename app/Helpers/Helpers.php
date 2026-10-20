@@ -29,47 +29,91 @@ class Helpers
         return $url;
     }
 
+    /* Miniature (400 px max, JPEG) d'une image du cache, générée à la première demande */
+    public static function thumbnail(string $file): ?string {
+        $thumb = dirname($file) . "/thumb/" . basename($file);
+        if (is_file($thumb)) {
+            return $thumb;
+        }
+        try {
+            $src = @imagecreatefromstring(file_get_contents($file));
+            if ($src === false) {
+                return null;
+            }
+            $width = imagesx($src);
+            $height = imagesy($src);
+            $ratio = min(1, 400 / max($width, $height));
+            $dst = imagescale($src, max(1, (int) round($width * $ratio)), max(1, (int) round($height * $ratio)));
+
+            if (!is_dir(dirname($thumb))) {
+                mkdir(dirname($thumb), 0775, true);
+            }
+            imagejpeg($dst, $thumb, 80);
+            return $thumb;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     public static function getPic($lastfm_mbid, $default = "/images/home_default.png"): string{
         $pic = "";
         try{
             $fileCache = public_path("images/cache") . "/" . $lastfm_mbid . ".jpg";
+            // Marqueur "pas d'image chez fanart.tv" : évite de réinterroger fanart à chaque affichage
+            $fileNone = public_path("images/cache") . "/" . $lastfm_mbid . ".none";
 
-            if (file_exists($fileCache))
-            {
-                $pic = "/images/cache/" . $lastfm_mbid . ".jpg";;
-            } else {
+            if (!file_exists($fileCache) && !(file_exists($fileNone) && filemtime($fileNone) > time() - 3 * 86400)) {
                 $url = "https://webservice.fanart.tv/v3.2/music/" . $lastfm_mbid . "?api_key=" . env("FANART_KEY");
 
                 $options = [
                     "ssl" => [
                         "verify_peer" => false,
                         "verify_peer_name" => false
+                    ],
+                    "http" => [
+                        "timeout" => 5
                     ]
                 ];
+                $context = stream_context_create($options);
 
-                $json = file_get_contents($url, false, stream_context_create($options));
-                if ($json !== "") {
-                    $json = json_decode($json, true);
+                try {
+                    $json = file_get_contents($url, false, $context);
+                    if ($json !== "") {
+                        $json = json_decode($json, true);
 
-                    if (isset($json["artistthumb"])) {
-                        if (isset($json["artistthumb"][0])) {
-                            $pic = $json["artistthumb"][0]["url"];
+                        if (isset($json["artistthumb"])) {
+                            if (isset($json["artistthumb"][0])) {
+                                $pic = $json["artistthumb"][0]["url"];
+                            }
+                        }
+
+                        if ($pic === "" && isset($json["albums"][0]["albumcover"][0]["url"])) {
+                            $pic = $json["albums"][0]["albumcover"][0]["url"];
                         }
                     }
 
-                    if ($pic === "" && isset($json["albums"][0]["albumcover"][0]["url"])) {
-                        $pic = $json["albums"][0]["albumcover"][0]["url"];
+                    if (is_array($pic)){
+                        $pic = $pic[1]['#text'];
                     }
+                    if ($pic !== "")
+                    {
+                        file_put_contents($fileCache, file_get_contents($pic, false, $context));
+                    }
+                } catch (\Exception $e) {
+                    // Artiste inconnu de fanart.tv (404) ou fanart injoignable
                 }
 
-                if (is_array($pic)){
-                    $pic = $pic[1]['#text'];
+                if (!file_exists($fileCache)) {
+                    touch($fileNone);
                 }
-                if ($pic !== "")
-                {
-                    file_put_contents($fileCache, file_get_contents($pic));
-                    $pic = "/images/cache/" . $lastfm_mbid . ".jpg";
-                }
+                $pic = "";
+            }
+
+            if (file_exists($fileCache)) {
+                // Miniature légère plutôt que l'original (souvent 300 à 700 Ko)
+                $pic = self::thumbnail($fileCache) !== null
+                    ? "/images/cache/thumb/" . $lastfm_mbid . ".jpg"
+                    : "/images/cache/" . $lastfm_mbid . ".jpg";
             }
         }catch(\Exception $e){
            // echo $e->getMessage();

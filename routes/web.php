@@ -20,12 +20,7 @@ if (!App::runningInConsole()) {
 	if (env("RESTRICT_IP") == false){
         $allowedIps = [$_SERVER['REMOTE_ADDR']];
     } else {
-        $allowedIps = [];
-        if (Ip::all()->count() > 0){
-            foreach (Ip::all() as $ip){
-                $allowedIps[] = $ip['ip'];
-            }
-        }
+        $allowedIps = Ip::pluck('ip')->all();
     }
 
 	if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'],$allowedIps)){
