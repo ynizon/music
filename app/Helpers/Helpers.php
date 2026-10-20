@@ -47,7 +47,7 @@ class Helpers
                 if ($pic !== "")
                 {
                     file_put_contents($fileCache, file_get_contents($pic));
-                    $pic = "images/cache/" . $lastfm_mbid . ".jpg";
+                    $pic = "/images/cache/" . $lastfm_mbid . ".jpg";
                 }
             }
         }catch(\Exception $e){

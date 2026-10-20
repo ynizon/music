@@ -154,15 +154,20 @@ class SearchController extends BaseController
 	}
 
 	public function picture($mbid, Request $request){
-		$arrContextOptions=array(
-			"ssl"=>array(
-				"verify_peer"=>false,
-				"verify_peer_name"=>false,
-			),
-		);
-		header("Content-type: image/png");
-		$url = Helpers::getPic($mbid,$request->input('default'));
-		echo file_get_contents($url, false, stream_context_create($arrContextOptions));
+		$pic = Helpers::getPic($mbid, $request->input('default', "/images/home_default.png"));
+
+		// Image distante (last.fm...) : le navigateur la charge directement
+		if (str_starts_with($pic, "http")) {
+			return redirect($pic);
+		}
+
+		// Image locale (cache) : chemin d'URL -> fichier dans public/
+		$file = public_path(ltrim($pic, "/"));
+		if (!is_file($file) || filesize($file) === 0) {
+			$file = public_path("images/home_default.png");
+		}
+
+		return response()->file($file, ["Cache-Control" => "public, max-age=604800"]);
 	}
 
     public function franceinfo(Request $request){

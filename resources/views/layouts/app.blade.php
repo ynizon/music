@@ -11,6 +11,16 @@ use App\Models\Title;
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" type="image/png" href="/images/favicon.png"/>
+	<script>
+		// Image par défaut pour toute image qui ne se charge pas (pochette absente, last.fm en erreur...)
+		document.addEventListener('error', function (e) {
+			var img = e.target;
+			if (img.tagName === 'IMG' && !img.dataset.fallback) {
+				img.dataset.fallback = '1';
+				img.src = '/images/home_default.png';
+			}
+		}, true);
+	</script>
 
 	@php
 		//Recup des METAS
