@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use App\Models\SonosFavorite;
 
 class SonosCustomController extends Controller
 {
@@ -14,7 +16,18 @@ class SonosCustomController extends Controller
     {
         $speakers = config('app.SONOS_SPEAKERS') ?: [
         ];
-        return view('sonos.index', compact('speakers'));
+
+        // Charger les favoris si l'utilisateur est connecté
+        $favorites = [];
+        if (Auth::check()) {
+            $favorites = SonosFavorite::where('user_id', Auth::id())
+                ->orderBy('artist')
+                ->orderBy('album_name')
+                ->get()
+                ->toArray();
+        }
+
+        return view('sonos.index', compact('speakers', 'favorites'));
     }
 
     /**
@@ -169,7 +182,6 @@ class SonosCustomController extends Controller
             // Full path to folder (local for scanning, then mapped to NAS path)
             $localFolder = str_replace('\\', '/', config("app.MUSIC_FOLDER") ?: "/music/");
             $localFolderPath = $localFolder . '/' . $artist;
-			$init = false;
             if (!empty($path)) {
                 $localFolderPath .= '/' . $path;
             }
@@ -189,12 +201,8 @@ class SonosCustomController extends Controller
                         $nasAudioFile = $baseFolder . '/' . $artist."/".$line;
                         $file = str_replace('&', '%26', $nasAudioFile);
                         $file = utf8_decode($file);//Fix accent
-						if (!$init){							
-							$sonos->SetQueue("x-file-cifs:" . $file);
-							$init = true;
-						} else {
-							$sonos->AddURIToQueue("x-file-cifs:" . $file);
-						}
+                        //$sonos->SetQueue("x-file-cifs:" . $file);
+                        $sonos->AddURIToQueue("x-file-cifs:" . $file);
                     }
                 }
             } else {
@@ -207,12 +215,7 @@ class SonosCustomController extends Controller
                     $nasAudioFile = str_replace($localFolder, $baseFolder, $audioFile);
                     $file = str_replace('&', '%26', $nasAudioFile);
                     $file = utf8_decode($file);//Fix accent
-					if (!$init){							
-						$sonos->SetQueue("x-file-cifs:" . $file);
-						$init = true;
-					} else {
-						$sonos->AddURIToQueue("x-file-cifs:" . $file);
-					}
+                    $sonos->AddURIToQueue("x-file-cifs:" . $file);
                 }
             }
 
@@ -221,6 +224,63 @@ class SonosCustomController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Retourne la liste des favoris de l'utilisateur connecté.
+     */
+    public function favorites(): JsonResponse
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Non autorisé'], 401);
+        }
+
+        $favorites = SonosFavorite::where('user_id', Auth::id())
+            ->orderBy('artist')
+            ->orderBy('album_name')
+            ->get();
+
+        return response()->json($favorites);
+    }
+
+    /**
+     * Ajoute ou retire un favori pour l'utilisateur connecté.
+     */
+    public function toggleFavorite(Request $request): JsonResponse
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Non autorisé'], 401);
+        }
+
+        $artist    = $request->input('artist');
+        $albumName = $request->input('album_name');
+        $path      = $request->input('path');
+        $type      = $request->input('type');
+        $cover     = $request->input('cover');
+
+        if (empty($artist) || empty($path)) {
+            return response()->json(['error' => 'Données manquantes'], 400);
+        }
+
+        $existing = SonosFavorite::where('user_id', Auth::id())
+            ->where('path', $path)
+            ->first();
+
+        if ($existing) {
+            $existing->delete();
+            return response()->json(['action' => 'removed', 'message' => 'Retiré des favoris']);
+        }
+
+        SonosFavorite::create([
+            'user_id'    => Auth::id(),
+            'artist'     => $artist,
+            'album_name' => $albumName,
+            'path'       => $path,
+            'type'       => $type,
+            'cover'      => $cover,
+        ]);
+
+        return response()->json(['action' => 'added', 'message' => 'Ajouté aux favoris']);
     }
 
     /**

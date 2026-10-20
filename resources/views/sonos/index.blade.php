@@ -16,6 +16,39 @@
                         <input type="text" id="artist-search" placeholder="Rechercher un artiste (ex: Muse, ACDC...)" autocomplete="off">
                     </div>
 
+                    <!-- Favorites Section (visible uniquement si connecté et favoris existants) -->
+                    @auth
+                    <div id="favorites-section" style="{{ count($favorites) > 0 ? '' : 'display:none;' }}">
+                        <div class="favorites-header">
+                            <i class="fa fa-heart" style="color:#e05a77;"></i>
+                            <span>Mes Favoris</span>
+                        </div>
+                        <ul class="music-list" id="list-favorites">
+                            @foreach($favorites as $fav)
+                            <li class="music-item fav-item"
+                                data-path="{{ $fav['path'] }}"
+                                data-type="{{ $fav['type'] }}"
+                                data-artist="{{ $fav['artist'] }}"
+                                data-album="{{ $fav['album_name'] }}"
+                                data-cover="{{ $fav['cover'] ?? '' }}">
+                                <div class="music-item-info">
+                                    <i class="fa fa-{{ $fav['type'] === 'm3u8' ? 'list-ul' : 'folder-open' }}"></i>
+                                    <span>
+                                        <small style="color:#94a3b8;font-size:0.8em;">{{ $fav['artist'] }}</small><br>
+                                        {{ $fav['album_name'] }}
+                                    </span>
+                                </div>
+                                <div class="music-item-actions">
+                                    <i class="fa fa-heart music-item-unfav" title="Retirer des favoris"></i>
+                                    <i class="fa fa-play-circle music-item-action" title="Lire"></i>
+                                </div>
+                            </li>
+                            @endforeach
+                        </ul>
+                        <hr class="favorites-divider">
+                    </div>
+                    @endauth
+
                     <!-- Music Selection Area -->
                     <div id="artist-music-area" style="display: none;">
                         <h3 id="current-artist-name" style="font-weight: 700; margin-bottom: 1rem; font-size: 1.25rem; color: #fff;"></h3>
@@ -119,12 +152,17 @@
             });
 
             document.getElementById('artist-search').focus();
+
             // State variables
             let selectedIp = "{{ array_values($speakers)[0] ?? '' }}";
             let currentArtist = "";
             let currentSubPath = "";
             let isMuted = false;
             let activeTransportState = "STOPPED";
+
+            // Favorites state (paths set for O(1) lookup)
+            const isLoggedIn = {{ Auth::check() ? 'true' : 'false' }};
+            let favoritePaths = new Set({!! Auth::check() ? json_encode(array_column($favorites, 'path')) : '[]' !!});
 
             // Poll Sonos status every 5 seconds
             setInterval(fetchSonosStatus, 5000);
@@ -148,6 +186,155 @@
                     loadArtistMedia(artist);
                 }
             });
+
+            // ── FAVORITES ──────────────────────────────────────────────
+
+            // Click on ♥ icon on a regular music item (toggle favorite)
+            $(document).on("click", ".music-item-fav", function(e) {
+                e.stopPropagation();
+                const li      = $(this).closest(".music-item");
+                const path    = li.data("path");
+                const type    = li.data("type");
+                const artist  = currentArtist;
+                const album   = li.find(".music-item-info span").text().trim();
+                const cover   = li.data("cover");
+
+                toggleFavorite(path, type, artist, album, cover, $(this));
+            });
+
+            // Click on ♥ icon on a favorites item (remove)
+            $(document).on("click", ".music-item-unfav", function(e) {
+                e.stopPropagation();
+                const li   = $(this).closest(".fav-item");
+                const path = li.data("path");
+
+                $.ajax({
+                    url: "/sonos/favorites/toggle",
+                    type: "POST",
+                    data: {
+                        artist:     li.data("artist"),
+                        album_name: li.data("album"),
+                        path:       path,
+                        type:       li.data("type"),
+                        cover:      ""
+                    },
+                    success: function(data) {
+                        favoritePaths.delete(path);
+                        li.addClass("removing");
+                        setTimeout(function() {
+                            li.remove();
+                            if ($("#list-favorites li").length === 0) {
+                                $("#favorites-section").hide();
+                            }
+                            // Refresh heart icon if the album is currently displayed
+                            $(".music-item").each(function() {
+                                if ($(this).data("path") === path) {
+                                    $(this).find(".music-item-fav").removeClass("active");
+                                }
+                            });
+                        }, 300);
+                        showToast(data.message || "Retiré des favoris", "success");
+                    },
+                    error: function(xhr) {
+                        const msg = xhr.responseJSON ? xhr.responseJSON.error : "Erreur lors de la suppression.";
+                        showToast(msg, "error");
+                    }
+                });
+            });
+
+            // Click on play button of a favorite item
+            $(document).on("click", ".fav-item .music-item-action", function(e) {
+                e.stopPropagation();
+                const li     = $(this).closest(".fav-item");
+                const path   = li.data("path");
+                const type   = li.data("type");
+                const cover  = li.data("cover");
+                const artist = li.data("artist");
+
+                currentArtist = artist; // set context for playMusic
+                if (cover) {
+                    document.getElementById('cover').src = cover;
+                    $("#cover").show();
+                }
+                playMusic(type, path);
+            });
+
+            function toggleFavorite(path, type, artist, album, cover, $heartIcon) {
+                if (!isLoggedIn) return;
+
+                $.ajax({
+                    url: "/sonos/favorites/toggle",
+                    type: "POST",
+                    data: {
+                        artist:     artist,
+                        album_name: album,
+                        path:       path,
+                        type:       type,
+                        cover:      cover
+                    },
+                    success: function(data) {
+                        if (data.action === 'added') {
+                            favoritePaths.add(path);
+                            $heartIcon.addClass("active heart-beat");
+                            setTimeout(() => $heartIcon.removeClass("heart-beat"), 600);
+                            // Add to favorites list in DOM
+                            addFavoriteToDOM(artist, album, path, type, cover);
+                        } else {
+                            favoritePaths.delete(path);
+                            $heartIcon.removeClass("active");
+                            // Remove from favorites list in DOM
+                            removeFavoriteFromDOM(path);
+                        }
+                        showToast(data.message || "Favoris mis à jour", "success");
+                    },
+                    error: function(xhr) {
+                        const msg = xhr.responseJSON ? xhr.responseJSON.error : "Erreur lors de la mise à jour des favoris.";
+                        showToast(msg, "error");
+                    }
+                });
+            }
+
+            function addFavoriteToDOM(artist, album, path, type, cover) {
+                const icon = type === 'm3u8' ? 'list-ul' : 'folder-open';
+                const li = $("<li class='music-item fav-item removing'></li>")
+                    .data("path",   path)
+                    .data("type",   type)
+                    .data("artist", artist)
+                    .data("album",  album)
+                    .data("cover",  cover)
+                    .append(
+                        $("<div class='music-item-info'></div>")
+                            .append($("<i class='fa fa-" + icon + "'></i>"))
+                            .append($("<span><small style='color:#94a3b8;font-size:0.8em;'>" + $('<div/>').text(artist).html() + "</small><br>" + $('<div/>').text(album).html() + "</span>"))
+                    )
+                    .append(
+                        $("<div class='music-item-actions'></div>")
+                            .append($("<i class='fa fa-heart music-item-unfav' title='Retirer des favoris'></i>"))
+                            .append($("<i class='fa fa-play-circle music-item-action' title='Lire'></i>"))
+                    );
+
+                $("#list-favorites").append(li);
+                $("#favorites-section").show();
+                // Trigger reflow to animate in
+                setTimeout(() => li.removeClass("removing"), 10);
+            }
+
+            function removeFavoriteFromDOM(path) {
+                $("#list-favorites .fav-item").each(function() {
+                    if ($(this).data("path") === path) {
+                        $(this).addClass("removing");
+                        const self = $(this);
+                        setTimeout(function() {
+                            self.remove();
+                            if ($("#list-favorites li").length === 0) {
+                                $("#favorites-section").hide();
+                            }
+                        }, 300);
+                    }
+                });
+            }
+
+            // ── MEDIA LOADING ─────────────────────────────────────────
 
             // Load media (folders + M3Us) for selected artist
             function loadArtistMedia(artist, subpath = "") {
@@ -175,14 +362,14 @@
                             $("#section-m3u").show();
                             data.m3us.forEach(function(m3u) {
                                 const label = m3u.name;
+                                const isFav = favoritePaths.has(m3u.path);
                                 const item = $("<li class='music-item'></li>")
                                     .data("path", m3u.path)
                                     .data("type", "m3u8")
                                     .data("cover", m3u.cover)
                                     .append($("<div class='music-item-info'><i class='fa fa-list-ul'></i><span>" + label + "</span></div>"))
-                                    .append($("<i class='fa fa-play-circle music-item-action'></i>"));
+                                    .append(buildActions(isFav));
                                 listM3u.append(item);
-                                console.log(m3u);
                             });
                         } else {
                             $("#section-m3u").hide();
@@ -210,6 +397,7 @@
                             $("#section-folders").show();
                             data.folders.forEach(function(folder) {
                                 const label = folder.name;
+                                const isFav = favoritePaths.has(folder.path);
                                 const item = $("<li class='music-item'></li>")
                                     .data("path", folder.path)
                                     .data("type", "folder")
@@ -217,7 +405,7 @@
                                     .data("cover", folder.cover)
                                     .data("m3u-path", folder.m3u_path)
                                     .append($("<div class='music-item-info'><i class='fa fa-folder-open'></i><span>" + label + "</span></div>"))
-                                    .append($("<i class='fa fa-play-circle music-item-action'></i>"));
+                                    .append(buildActions(isFav));
                                 listFolders.append(item);
                             });
                         } else if (!currentSubPath) {
@@ -231,7 +419,22 @@
                 });
             }
 
-            // Click handler to navigate folders or play music
+            /**
+             * Construit le bloc d'actions (cœur + play) pour un item.
+             * Si l'utilisateur n'est pas connecté, seul le bouton play est affiché.
+             */
+            function buildActions(isFav) {
+                const $actions = $("<div class='music-item-actions'></div>");
+                if (isLoggedIn) {
+                    const $heart = $("<i class='fa fa-heart music-item-fav' title='Ajouter aux favoris'></i>");
+                    if (isFav) $heart.addClass("active");
+                    $actions.append($heart);
+                }
+                $actions.append($("<i class='fa fa-play-circle music-item-action' title='Lire'></i>"));
+                return $actions;
+            }
+
+            // Click handler to show cover on hover
             $(document).on("mouseover", ".music-item", function(e) {
                 if( $(this).data("cover") !== '')
                 {
@@ -240,11 +443,18 @@
                 }
             });
 
+            // Click handler to navigate folders or play music
             $(document).on("click", ".music-item", function(e) {
-                const path = $(this).data("path");
-                const type = $(this).data("type");
-                const hasM3u = $(this).data("has-m3u");
-                const cover = $(this).data("cover");
+                // Handled separately by delegated handlers above
+                if ($(e.target).hasClass("music-item-fav")    || $(e.target).parent().hasClass("music-item-fav") ||
+                    $(e.target).hasClass("music-item-unfav")  || $(e.target).parent().hasClass("music-item-unfav")) {
+                    return;
+                }
+
+                const path    = $(this).data("path");
+                const type    = $(this).data("type");
+                const hasM3u  = $(this).data("has-m3u");
+                const cover   = $(this).data("cover");
                 const m3uPath = $(this).data("m3u-path");
 
                 // If play action clicked

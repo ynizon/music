@@ -58,6 +58,8 @@ if (!App::runningInConsole()) {
 		Route::get('/sonos/albums', [SonosCustomController::class, 'albums']);
 		Route::post('/sonos/play', [SonosCustomController::class, 'play']);
 		Route::post('/sonos/control', [SonosCustomController::class, 'control']);
+		Route::get('/sonos/favorites', [SonosCustomController::class, 'favorites']);
+		Route::post('/sonos/favorites/toggle', [SonosCustomController::class, 'toggleFavorite']);
 
         Route::get('/franceinfo', [SearchController::class,'franceinfo']);
 	} else {

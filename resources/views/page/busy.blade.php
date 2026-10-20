@@ -61,7 +61,7 @@
 								<?php
 								}
 
-								$sImage = ²;
+								$sImage = "";
 								if ($oArtist["image"][2]["#text"] != ""){
 									$sImage = $oArtist["image"][2]["#text"];
 									//$sImage = "/images/home_default.png";
