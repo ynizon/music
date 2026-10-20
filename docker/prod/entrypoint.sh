@@ -13,10 +13,17 @@ if [ -S /var/run/docker.sock ]; then
     usermod -aG "$sock_group" www-data
 fi
 
-# Les volumes du NAS peuvent être vides ou appartenir à un autre utilisateur
-mkdir -p storage/app/download storage/framework/cache storage/framework/sessions \
-    storage/framework/views storage/logs public/images/cache /data/database
-for dir in storage bootstrap/cache public/images/cache /data/database; do
+# Données du site dans /data (dossier du NAS) : .env, storage, database, public/images/cache
+mkdir -p /data/storage/app/download /data/storage/framework/cache /data/storage/framework/sessions \
+    /data/storage/framework/views /data/storage/logs /data/database /data/public/images/cache
+[ -f /data/.env ] || echo "ATTENTION : /data/.env introuvable"
+ln -sfn /data/.env .env
+rm -rf storage public/images/cache
+ln -s /data/storage storage
+ln -s /data/public/images/cache public/images/cache
+
+# Les dossiers du NAS peuvent appartenir à un autre utilisateur
+for dir in /data/storage /data/database /data/public/images/cache bootstrap/cache; do
     find "$dir" ! -user www-data -exec chown www-data:www-data {} +
 done
 
