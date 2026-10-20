@@ -96,29 +96,18 @@ use App\Models\Title;
 
 	<title id="title_seo">{{$sTitre}}</title>
 
-	<!-- Scripts -->
-	@if (config("app.debug"))
-		<script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
-		<script src="{{ asset('js/jquery-ui.min.js') }}"></script>
-
-		<!-- <script src="{{ asset('js/jquery.ui.datepicker-fr.js') }}"></script> -->
-		<script src="{{ asset('js/utils.js') }}"></script>
-	@else
-		<script src="{{ asset('js/app.js') }}"></script>
-	@endif
+	<!-- Scripts (js/app.js et css/app.css sont d'anciens bundles qui ne sont plus régénérés) -->
+	<script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
+	<script src="{{ asset('js/jquery-ui.min.js') }}"></script>
+	<script src="{{ asset('js/utils.js') }}?v={{ filemtime(public_path('js/utils.js')) }}"></script>
 	@livewireScripts
 
 	<!-- Styles -->
-	@if (config("app.debug"))
-		<!-- Fonts -->
-		<link href="{{ asset('css/bootstrap/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
-		<link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
-		<link href="{{ asset('css/jquery-ui.min.css') }}" rel="stylesheet" type="text/css">
-		<link href="{{ asset('css/jquery-ui-1.8.17.custom.css') }}" rel="stylesheet" type="text/css">
-		<link href="{{ asset('css/styles.css') }}" rel="stylesheet" type="text/css">
-	@else
-		<link href="{{ asset('css/app.css') }}" rel="stylesheet" type="text/css">
-	@endif
+	<link href="{{ asset('css/bootstrap/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
+	<link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
+	<link href="{{ asset('css/jquery-ui.min.css') }}" rel="stylesheet" type="text/css">
+	<link href="{{ asset('css/jquery-ui-1.8.17.custom.css') }}" rel="stylesheet" type="text/css">
+	<link href="{{ asset('css/styles.css') }}?v={{ filemtime(public_path('css/styles.css')) }}" rel="stylesheet" type="text/css">
 	@livewireStyles
 	<script>
 		$(document).ready(function () {

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\View;
 class Helpers
 {
     // À incrémenter pour invalider les pages en cache (storage/cache) après un changement de vue
-    const CACHE_VERSION = 2;
+    const CACHE_VERSION = 3;
 
     // Image "sans visuel" (étoile grise) renvoyée par last.fm
     const LASTFM_PLACEHOLDER = "2a96cbd8b46e442fc41c2b86b821562f";
