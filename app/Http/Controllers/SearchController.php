@@ -154,7 +154,8 @@ class SearchController extends BaseController
 	}
 
 	public function picture($mbid, Request $request){
-		$pic = Helpers::getPic($mbid, $request->input('default', "/images/home_default.png"));
+		$default = Helpers::lastfmImage($request->input('default'), "/images/home_default.png");
+		$pic = Helpers::getPic($mbid, $default);
 
 		// Image distante (last.fm...) : le navigateur la charge directement
 		if (str_starts_with($pic, "http")) {

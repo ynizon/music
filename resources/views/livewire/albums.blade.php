@@ -19,9 +19,8 @@
 						<a class="inv" href="/artist/{{ urlencode(str_replace("/","",$artist->getName()))."/".urlencode
 						(str_replace("/","",$album['name']))}}">{{ $artist->getName()." " .$album['name']}}</a>
 						<a class="cover" onclick="lookForAlbum('{{ str_replace("'","\\'",$artist->getName())}}','{{ str_replace("'","\\'",$album['name'])}}');">
-							<img style="width:64px;height:64px;" @if ($loop->index > 4)
-								{{ "data-" }}
-							@endif src="{{$album["image"]}}" alt="image"/>
+							<img style="width:64px;height:64px;" loading="lazy"
+								src="{{ \App\Helpers\Helpers::lastfmImage($album["image"]) }}" alt="image"/>
 						</a>
 					</td>
 					<td>

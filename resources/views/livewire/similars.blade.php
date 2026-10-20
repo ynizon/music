@@ -22,8 +22,8 @@
                         <a class="inv" href="/artist/{{ urlencode(str_replace("/","",$similar['name']))}}">
                                 {{ $similar['name']}}</a>
                         <a class="cover" onclick="lookForArtist('{{ str_replace("'","\\'",$similar['name'])}}');">
-                            <img height="90" width="120" @if ($loop->index>4) data- @endif
-                            src="{{$similar['image']}}" alt="image"/>
+                            <img height="90" width="120" loading="lazy"
+                            src="{{ \App\Helpers\Helpers::lastfmImage($similar['image']) }}" alt="image"/>
                         </a>
                     </td>
                     <td>

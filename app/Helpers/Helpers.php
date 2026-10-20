@@ -8,6 +8,27 @@ use Illuminate\Support\Facades\View;
 
 class Helpers
 {
+    // À incrémenter pour invalider les pages en cache (storage/cache) après un changement de vue
+    const CACHE_VERSION = 2;
+
+    // Image "sans visuel" (étoile grise) renvoyée par last.fm
+    const LASTFM_PLACEHOLDER = "2a96cbd8b46e442fc41c2b86b821562f";
+
+    /* Image last.fm en grand format, ou l'image par défaut si last.fm n'en a pas */
+    public static function lastfmImage(?string $url, string $default = "/images/default_rotate.png"): string {
+        if ($url == "") {
+            return $default;
+        }
+        // Les URLs locales (/picture/..., /images/...) sont gérées côté serveur
+        if (str_starts_with($url, "http")) {
+            if (str_contains($url, self::LASTFM_PLACEHOLDER)) {
+                return $default;
+            }
+            $url = preg_replace("#/i/u/\d+s/#", "/i/u/300x300/", $url);
+        }
+        return $url;
+    }
+
     public static function getPic($lastfm_mbid, $default = "/images/home_default.png"): string{
         $pic = "";
         try{
@@ -372,7 +393,7 @@ class Helpers
                 $nbJoursTimestamp = $date2 - $date1;
                 $nbJours = round($nbJoursTimestamp/86400,0); // 86 400 = 60*60*24
 
-                if ($nbJours<=env("DELAY_CACHE")){
+                if ($nbJours<=env("DELAY_CACHE") && ($cache["version"] ?? 1) == self::CACHE_VERSION){
                     $r = $cache;
 
                     //On envoie le last modified uniquement lorsqu on affiche toute la page (et pas les blocs ajax)
@@ -441,6 +462,7 @@ class Helpers
                     $cache["view"] = $view;
                     $cache["videos"] = $videos;
                     $cache["updated_at"] = date("Y-m-d");
+                    $cache["version"] = self::CACHE_VERSION;
                     file_put_contents($cachefile,gzcompress(json_encode($cache),9));
                 }else{
                     if ($album != null){
@@ -461,6 +483,7 @@ class Helpers
                         $cache["infoalbum"] = $infoalbum;
                         $cache["videos"] = $videos;
                         $cache["updated_at"] = date("Y-m-d");
+                        $cache["version"] = self::CACHE_VERSION;
                         file_put_contents($cachefile,gzcompress(json_encode($cache),9));
                     }else{
                         if ($artist != null){
@@ -486,6 +509,7 @@ class Helpers
                             $cache["videos"] = $videos;
                             $cache["lives"] = $lives;
                             $cache["updated_at"] = date("Y-m-d");
+                            $cache["version"] = self::CACHE_VERSION;
 
                             file_put_contents($cachefile,gzcompress(json_encode($cache),9));
                         }
