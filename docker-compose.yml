@@ -5,7 +5,7 @@ services:
     container_name: music-gameandme
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "6000:80"
     environment:
       # Reverse proxy autorisé à transmettre l'IP du client (réseau Docker + localhost)
       TRUSTED_PROXIES: "172.16.0.0/12 127.0.0.1"
