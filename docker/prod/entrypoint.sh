@@ -28,14 +28,27 @@ if [ ! -f vendor/composer/installed.json ] || [ composer.lock -nt vendor/compose
     rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
 fi
 
-# Les dossiers du NAS peuvent appartenir à un autre utilisateur
 mkdir -p storage/app/download storage/framework/cache storage/framework/sessions \
     storage/framework/views storage/logs bootstrap/cache database public/images/cache
+
+# Code modifiable depuis le NAS : il appartient au propriétaire du dossier monté (ou PUID/PGID)
+code_uid=${PUID:-$(stat -c %u /var/www/html)}
+code_gid=${PGID:-$(stat -c %g /var/www/html)}
+find . \( -path ./storage -o -path ./bootstrap/cache -o -path ./database -o -path ./public/images/cache \
+    -o -path ./vendor -o -path './public/sitemap*' \) -prune -o ! -user "$code_uid" -exec chown "$code_uid:$code_gid" {} +
+
+# Dossiers écrits par l'application, restant modifiables par le groupe du propriétaire
 for dir in storage bootstrap/cache database public/images/cache; do
-    find "$dir" ! -user www-data -exec chown www-data:www-data {} +
+    find "$dir" \( ! -user www-data -o ! -group "$code_gid" \) -exec chown "www-data:$code_gid" {} +
+    find "$dir" ! -perm -g=w -exec chmod g+rwX {} +
+    find "$dir" -type d ! -perm -g=s -exec chmod g+s {} +
 done
 # Sitemaps écrits à la racine de public
-find public -maxdepth 1 ! -user www-data -exec chown www-data:www-data {} +
+chgrp www-data public && chmod g+w public
+find public -maxdepth 1 -name 'sitemap*' ! -user www-data -exec chown "www-data:$code_gid" {} +
+
+# Fichiers créés par Apache modifiables par le groupe
+umask 0002
 
 [ -f bootstrap/cache/packages.php ] || su -s /bin/sh www-data -c "php artisan package:discover"
 

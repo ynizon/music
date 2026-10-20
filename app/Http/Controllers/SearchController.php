@@ -35,7 +35,7 @@ class SearchController extends BaseController
         $artist_name = urldecode($artist_name);
         $artist_name_recode = $this->artistRepository->fixName($artist_name);
         if ($artist_name_recode != $artist_name){
-            header("location: /go/".$artist_name_recode);
+            return redirect("/go/".$artist_name_recode);
         }
         $artist = $this->artistRepository->getBySlug(Str::slug($artist_name));
         if ($artist == null){
