@@ -1,6 +1,6 @@
 ## Goal
 A web interface, to discover and listen new music artists.
-It's a mashup website with lastfm / youtube with Laravel / PHP 8.2.
+It's a mashup website with lastfm / youtube with Laravel / PHP 8.3.
 
 ## Screenshots
 Front:
