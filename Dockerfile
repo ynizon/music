@@ -33,10 +33,11 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction --prefer-dist
 
 COPY . .
-RUN composer dump-autoload --optimize --no-dev --no-scripts \
-    && php artisan package:discover --ansi \
-    && mkdir -p storage/app/download storage/framework/cache storage/framework/sessions \
+# storage est exclu du contexte : Laravel a besoin de son arborescence avant tout appel à artisan
+RUN mkdir -p storage/app/download storage/framework/cache storage/framework/sessions \
         storage/framework/views storage/logs bootstrap/cache public/images/cache \
+    && composer dump-autoload --optimize --no-dev --no-scripts \
+    && php artisan package:discover --ansi \
     && chown -R www-data:www-data storage bootstrap/cache public
 
 ENTRYPOINT ["app-entrypoint"]
