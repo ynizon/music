@@ -89,12 +89,10 @@
 
                     <!-- Destination Toggle -->
                     <div class="speaker-selector">
-                        @php $isFirst = true; @endphp
                         @foreach ($speakers as $name => $ip)
-                            <div class="speaker-option {{ $isFirst ? 'active' : '' }}" data-ip="{{ $ip }}" id="opt-{{ strtolower($name) }}">
+                            <div class="speaker-option {{ $name === $selectedRoom ? 'active' : '' }}" data-ip="{{ $ip }}" id="opt-{{ strtolower($name) }}">
                                 {{ $name }}
                             </div>
-                            @php $isFirst = false; @endphp
                         @endforeach
                     </div>
 
@@ -157,7 +155,7 @@
             document.getElementById('artist-search').focus();
 
             // State variables
-            let selectedIp = "{{ array_values($speakers)[0] ?? '' }}";
+            let selectedIp = "{{ $speakers[$selectedRoom] ?? '' }}";
             let currentArtist = "";
             let currentSubPath = "";
             let isMuted = false;
@@ -376,6 +374,15 @@
 
                 recognition.start();
             });
+
+            // Raccourci téléphone : /sonos?voice lance directement l'écoute
+            const urlParams = new URLSearchParams(window.location.search);
+            if (SpeechRecognition && urlParams.has("voice")) {
+                urlParams.delete("voice");
+                const query = urlParams.toString();
+                history.replaceState(null, "", window.location.pathname + (query ? "?" + query : "") + window.location.hash);
+                $("#btn-voice").click();
+            }
 
             function normalizeName(name) {
                 return name.toLowerCase()

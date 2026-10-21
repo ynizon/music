@@ -571,6 +571,7 @@ class SonosPHPController
 			'softwareVersion' => (string)$xml->device->softwareVersion,
 			'hardwareVersion' => (string)$xml->device->hardwareVersion,
 			'roomName' => (string)$xml->device->roomName,
+			'UDN' => (string)$xml->device->UDN,
 		];
 
 		return $out;

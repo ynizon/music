@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Models\SonosFavorite;
 
 class SonosCustomController extends Controller
@@ -12,10 +13,20 @@ class SonosCustomController extends Controller
     /**
      * Render the main Sonos control page.
      */
-    public function index()
+    public function index(Request $request)
     {
         $speakers = config('app.SONOS_SPEAKERS') ?: [
         ];
+
+        // Pièce présélectionnée via ?room=salon (insensible à la casse et aux accents), sinon la première
+        $selectedRoom = array_key_first($speakers);
+        $room = Str::ascii(mb_strtolower((string) $request->query('room')));
+        foreach (array_keys($speakers) as $name) {
+            if ($room !== '' && Str::ascii(mb_strtolower($name)) === $room) {
+                $selectedRoom = $name;
+                break;
+            }
+        }
 
         // Charger les favoris si l'utilisateur est connecté
         $favorites = [];
@@ -27,7 +38,7 @@ class SonosCustomController extends Controller
                 ->toArray();
         }
 
-        return view('sonos.index', compact('speakers', 'favorites'));
+        return view('sonos.index', compact('speakers', 'favorites', 'selectedRoom'));
     }
 
     /**
@@ -199,10 +210,7 @@ class SonosCustomController extends Controller
                     $line = trim($line);
                     if (!empty($line) && strpos($line, '#EXT') === false) {
                         $nasAudioFile = $baseFolder . '/' . $artist."/".$line;
-                        $file = str_replace('&', '%26', $nasAudioFile);
-                        $file = utf8_decode($file);//Fix accent
-                        //$sonos->SetQueue("x-file-cifs:" . $file);
-                        $sonos->AddURIToQueue("x-file-cifs:" . $file);
+                        $sonos->AddURIToQueue($this->cifsUri($nasAudioFile));
                     }
                 }
             } else {
@@ -213,17 +221,42 @@ class SonosCustomController extends Controller
 
                 foreach ($audioFiles as $audioFile) {
                     $nasAudioFile = str_replace($localFolder, $baseFolder, $audioFile);
-                    $file = str_replace('&', '%26', $nasAudioFile);
-                    $file = utf8_decode($file);//Fix accent
-                    $sonos->AddURIToQueue("x-file-cifs:" . $file);
+                    $sonos->AddURIToQueue($this->cifsUri($nasAudioFile));
                 }
             }
 
-            $sonos->Play();
+            // La file n'est pas forcément la source active (radio, TV, autre flux...) :
+            // on la sélectionne explicitement et on repart du premier morceau
+            $udn = str_replace('uuid:', '', $sonos->device_info()['UDN'] ?? '');
+            if ($udn !== '') {
+                $sonos->SetQueue('x-rincon-queue:' . $udn . '#0');
+            }
+            $sonos->ChangeTrack(1);
+
+            // Juste après le remplissage de la file, la Sonos peut ignorer le Play (état TRANSITIONING)
+            for ($attempt = 0; $attempt < 5; $attempt++) {
+                $sonos->Play();
+                usleep(500000);
+                if ($sonos->GetTransportInfo() === 'PLAYING') {
+                    break;
+                }
+            }
+
             return response()->json(['success' => true, 'message' => 'Lecture lancée avec succès !']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * URI Sonos d'un fichier du NAS. La Sonos décode les séquences %xx :
+     * "%" doit être échappé en premier ("100% Bon Jovi"), puis "&" et "#".
+     */
+    private function cifsUri(string $nasFile): string
+    {
+        $file = str_replace(['%', '&', '#'], ['%25', '%26', '%23'], $nasFile);
+        $file = utf8_decode($file);//Fix accent
+        return "x-file-cifs:" . $file;
     }
 
     /**
