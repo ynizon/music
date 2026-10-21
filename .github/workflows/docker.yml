@@ -4,6 +4,9 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
+  # Rebuild quotidien : récupère automatiquement les correctifs de l'image php:8.3-apache
+  schedule:
+    - cron: '0 4 * * *'
 
 jobs:
   build:
@@ -25,6 +28,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          pull: true
           tags: |
             ynizon/music:latest
             ynizon/music:${{ github.sha }}
