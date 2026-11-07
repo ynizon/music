@@ -22,7 +22,7 @@ COPY docker/prod/entrypoint.sh /usr/local/bin/app-entrypoint
 COPY docker/prod/download_spotify.sh /usr/local/bin/download_spotify.sh
 RUN chmod +x /usr/local/bin/app-entrypoint /usr/local/bin/download_spotify.sh
 
-ENV TRUSTED_PROXIES="172.16.0.0/12 127.0.0.1" \
+ENV TRUSTED_PROXIES="10.0.3.0/24 172.16.0.0/12 127.0.0.1" \
     RUN_MIGRATIONS=true \
     OPCACHE_VALIDATE_TIMESTAMPS=1 \
     COMPOSER_HOME=/tmp/composer \
