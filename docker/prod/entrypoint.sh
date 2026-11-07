@@ -40,9 +40,10 @@ find . \( -path ./storage -o -path ./bootstrap/cache -o -path ./database -o -pat
 # Dossiers écrits par l'application, restant modifiables par le groupe du propriétaire.
 # Ces dossiers contiennent des millions de fichiers (caches d'images, sessions) : le parcours
 # récursif complet prend des heures sur disque dur. Il n'est fait qu'une fois (fichier témoin),
-# ensuite seul le premier niveau est vérifié (les fichiers créés par Apache sont déjà corrects).
+# ensuite seul le dossier lui-même est vérifié (les fichiers créés par Apache sont déjà corrects ;
+# même le premier niveau de public/images/cache compte environ un million de fichiers).
 for dir in storage bootstrap/cache database public/images/cache; do
-    depth="-maxdepth 1"
+    depth="-maxdepth 0"
     [ -f "$dir/.permissions-ok" ] || depth=""
     find "$dir" $depth \( ! -user www-data -o ! -group "$code_gid" \) -exec chown "www-data:$code_gid" {} +
     find "$dir" $depth ! -perm -g=w -exec chmod g+rwX {} +
