@@ -63,4 +63,12 @@ if [ "$RUN_MIGRATIONS" = "true" ] && [ -f .env ]; then
     su -s /bin/sh www-data -c "php artisan migrate --force" || echo "Migrations en échec, voir les logs ci-dessus"
 fi
 
+# TRUSTED_PROXIES peut être défini dans .env (prioritaire sur la variable du conteneur) :
+# Apache le lit dans son environnement (RemoteIPInternalProxy), pas Laravel.
+env_proxies=$(grep -E '^TRUSTED_PROXIES=' .env 2>/dev/null | tail -n 1 | cut -d= -f2- | tr -d "\"'\r")
+if [ -n "$env_proxies" ]; then
+    export TRUSTED_PROXIES="$env_proxies"
+fi
+echo "Proxys de confiance (X-Forwarded-For) : $TRUSTED_PROXIES"
+
 exec docker-php-entrypoint "$@"
