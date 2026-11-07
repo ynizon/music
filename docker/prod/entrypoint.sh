@@ -37,11 +37,17 @@ code_gid=${PGID:-$(stat -c %g /var/www/html)}
 find . \( -path ./storage -o -path ./bootstrap/cache -o -path ./database -o -path ./public/images/cache \
     -o -path ./vendor -o -path './public/sitemap*' \) -prune -o ! -user "$code_uid" -exec chown "$code_uid:$code_gid" {} +
 
-# Dossiers écrits par l'application, restant modifiables par le groupe du propriétaire
+# Dossiers écrits par l'application, restant modifiables par le groupe du propriétaire.
+# Ces dossiers contiennent des millions de fichiers (caches d'images, sessions) : le parcours
+# récursif complet prend des heures sur disque dur. Il n'est fait qu'une fois (fichier témoin),
+# ensuite seul le premier niveau est vérifié (les fichiers créés par Apache sont déjà corrects).
 for dir in storage bootstrap/cache database public/images/cache; do
-    find "$dir" \( ! -user www-data -o ! -group "$code_gid" \) -exec chown "www-data:$code_gid" {} +
-    find "$dir" ! -perm -g=w -exec chmod g+rwX {} +
-    find "$dir" -type d ! -perm -g=s -exec chmod g+s {} +
+    depth="-maxdepth 1"
+    [ -f "$dir/.permissions-ok" ] || depth=""
+    find "$dir" $depth \( ! -user www-data -o ! -group "$code_gid" \) -exec chown "www-data:$code_gid" {} +
+    find "$dir" $depth ! -perm -g=w -exec chmod g+rwX {} +
+    find "$dir" $depth -type d ! -perm -g=s -exec chmod g+s {} +
+    touch "$dir/.permissions-ok" && chown "www-data:$code_gid" "$dir/.permissions-ok"
 done
 # Sitemaps écrits à la racine de public
 chgrp www-data public && chmod g+w public
