@@ -326,10 +326,7 @@ class Artist extends Model
 
     private function refreshYoutubeFullAlbums($bSave = false) : bool {
         try {
-            $url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" .
-                urlencode($this->getName() . " full album")
-                . "&maxResults=50&key=" . env("YOUTUBE_API");
-            $sBio = Helpers::getYoutubeData($url);
+            $sBio = Helpers::youtubeSearch($this->getName() . " full album");
 
             if ($sBio != null && trim($sBio) != "") {
                 $sBio = json_decode($sBio, true);
@@ -356,10 +353,7 @@ class Artist extends Model
 
     private function refreshYoutubeLives($bSave = false) : bool {
         try {
-            $url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" .
-                urlencode($this->getName() . " live")
-                . "&maxResults=50&key=" . env("YOUTUBE_API");
-            $sBio = Helpers::getYoutubeData($url);
+            $sBio = Helpers::youtubeSearch($this->getName() . " live");
 
             if ($sBio != null && trim($sBio) != "") {
                 $sBio = json_decode($sBio, true);

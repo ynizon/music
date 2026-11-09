@@ -11,7 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Avant StartSession : pas de fichier de session pour les visiteurs inconnus (robots)
+        $middleware->prepend(\App\Http\Middleware\StatelessForUnknownVisitors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

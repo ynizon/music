@@ -114,10 +114,7 @@ class Title extends Model
 
     private function refreshYoutubeData(bool $bSave) : bool{
         try {
-            $url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" .
-                urlencode($this->artist->getName() . " " . $this->getName()) .
-                "&maxResults=50&key=" . env("YOUTUBE_API");
-            $sBio = Helpers::getYoutubeData($url);
+            $sBio = Helpers::youtubeSearch($this->artist->getName() . " " . $this->getName());
 
             if ($sBio != null && trim($sBio) != "") {
                 $sBio = json_decode($sBio, true);

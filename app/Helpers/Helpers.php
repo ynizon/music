@@ -63,7 +63,8 @@ class Helpers
             $fileNone = public_path("images/cache") . "/" . $lastfm_mbid . ".none";
 
             if (!file_exists($fileCache) && !(file_exists($fileNone) && filemtime($fileNone) > time() - 3 * 86400)) {
-                $url = "https://webservice.fanart.tv/v3.2/music/" . $lastfm_mbid . "?api_key=" . env("FANART_KEY");
+                // Clé dans l'en-tête api-key (pas dans l'URL) : elle n'apparaît pas dans les erreurs
+                $url = "https://webservice.fanart.tv/v3.2/music/" . $lastfm_mbid;
 
                 $options = [
                     "ssl" => [
@@ -71,7 +72,8 @@ class Helpers
                         "verify_peer_name" => false
                     ],
                     "http" => [
-                        "timeout" => 5
+                        "timeout" => 5,
+                        "header" => "api-key: " . env("FANART_KEY") . "\r\n",
                     ]
                 ];
                 $context = stream_context_create($options);
@@ -593,9 +595,31 @@ class Helpers
         return str_replace("\n","",$extrait.' '.$extrait2);
     }
 
-    public static function getYoutubeData($url) : string|null {
+    /**
+     * Recherche YouTube (API Data v3). La clé est envoyée dans l'en-tête X-goog-api-key
+     * et non dans l'URL, pour qu'elle n'apparaisse pas dans les messages d'erreur ni les logs.
+     */
+    public static function youtubeSearch(string $query, int $maxResults = 50) : string|null {
+        $url = "https://www.googleapis.com/youtube/v3/search?" . http_build_query([
+            "part" => "snippet",
+            "q" => $query,
+            "maxResults" => $maxResults,
+        ]);
+        $context = stream_context_create([
+            "http" => [
+                "header" => "X-goog-api-key: " . env("YOUTUBE_API") . "\r\n",
+                "timeout" => 10,
+            ],
+        ]);
+
         try{
-            return file_get_contents($url);
+            $content = @file_get_contents($url, false, $context);
+            if ($content === false) {
+                $status = $http_response_header[0] ?? "pas de réponse";
+                Log::error("Recherche YouTube \"" . $query . "\" : " . $status);
+                return null;
+            }
+            return $content;
         }catch(\Exception $e){
             Log::error($e->getMessage());
         }

@@ -164,9 +164,7 @@ class AjaxController extends BaseController
 	public function keyword(Request $request){
 		try{
 			$album = new Album();
-			$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=".
-                urlencode($request->input("keywords"))."&maxResults=50&key=".env("YOUTUBE_API");
-			$sBio = Helpers::getYoutubeData($url);
+			$sBio = Helpers::youtubeSearch((string) $request->input("keywords"));
 			if (trim($sBio) != ""){
                 $sBio = json_decode($sBio, true);
                 $titles = [];
