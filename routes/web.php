@@ -22,6 +22,7 @@ Route::middleware(AllowedVisitor::class)->group(function () {
 
     Route::get('/', [HomeController::class,'index']);
     Route::get('/sitemap.xml', [HomeController::class,'sitemap']);
+    Route::get('/sitemap-{name}.xml', [HomeController::class,'sitemapFile'])->where('name', '[a-z]+-[0-9]+');
     Route::get('/contact', [HomeController::class,'contact']);
     Route::get('/faq', [HomeController::class,'faq']);
     Route::get('/download', [HomeController::class,'download']);

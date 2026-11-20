@@ -202,6 +202,13 @@ class HomeController extends Controller
 		return response($generator->index(), 200)->header('Content-Type', 'application/xml');
 	}
 
+	public function sitemapFile(SitemapGenerator $generator, string $name){
+		$file = $generator->file($name);
+		abort_if($file === null, 404);
+
+		return response()->file($file, ['Content-Type' => 'application/xml']);
+	}
+
 
 	public function download(Request $request){
 		$name = $request->input('name');

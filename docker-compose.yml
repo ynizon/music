@@ -12,8 +12,10 @@ services:
       # la passerelle 10.0.3.1 pour tout le monde et RESTRICT_IP ne filtre rien.
       TRUSTED_PROXIES: "10.0.3.0/24 172.16.0.0/12 127.0.0.1"
     volumes:
-      # Tout le site (code + .env, storage, database) : modifiable depuis le NAS
-      - /share/CACHEDEV1_DATA/nas/web/music.gameandme.fr:/var/www/html
+      # Données persistantes (le code est dans l'image) :
+      #   .env, database/database.sqlite, storage/, public/images/cache/
+      # L'ancien dossier du site a déjà cette arborescence : il peut servir de /data tel quel.
+      - /share/CACHEDEV1_DATA/nas/web/music.gameandme.fr:/data
       # Partage nas monté aux mêmes chemins que sur l'hôte (MUSIC_FOLDER, PATH_MUSIC*, spotdl)
       - /share/CACHEDEV1_DATA/nas:/share/CACHEDEV1_DATA/nas
       - /share/CACHEDEV1_DATA/nas:/share/nas

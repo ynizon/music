@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * Sitemaps découpés par groupe (artist, album, title) puis en lots de 50 000 URL
  * (limite du protocole), écrits en flux pour ne jamais charger une table entière en mémoire.
- * Fichiers produits : public/sitemap-{groupe}-{n}.xml, référencés par l'index /sitemap.xml.
+ * Fichiers produits : storage/app/sitemaps/sitemap-{groupe}-{n}.xml, servis par la route
+ * /sitemap-{groupe}-{n}.xml et référencés par l'index /sitemap.xml.
  */
 class SitemapGenerator
 {
@@ -98,10 +99,6 @@ class SitemapGenerator
         foreach ($tmpFiles as $i => $tmp) {
             rename($tmp, $this->path($group, $i));
         }
-        // Ancien format non découpé
-        if (file_exists(public_path("sitemap-{$group}.xml"))) {
-            unlink(public_path("sitemap-{$group}.xml"));
-        }
 
         return $count;
     }
@@ -132,7 +129,7 @@ class SitemapGenerator
      */
     public function files(string $group): array
     {
-        $files = glob(public_path("sitemap-{$group}-*.xml")) ?: [];
+        $files = glob($this->dir()."/sitemap-{$group}-*.xml") ?: [];
         $files = array_values(array_filter($files, fn ($f) => preg_match('/-\d+\.xml$/', $f)));
         natsort($files);
 
@@ -144,9 +141,35 @@ class SitemapGenerator
         return rtrim((string) (config('app.sitemap_url') ?: config('app.url')), '/');
     }
 
+    /**
+     * Fichier d'un lot à servir (nom du type "album-2"), ou null s'il n'existe pas.
+     */
+    public function file(string $name): ?string
+    {
+        if (! preg_match('/^([a-z]+)-(\d+)$/', $name, $m) || ! isset(self::GROUPS[$m[1]])) {
+            return null;
+        }
+        $path = $this->path($m[1], (int) $m[2]);
+
+        return is_file($path) ? $path : null;
+    }
+
+    /**
+     * Les sitemaps sont des données (storage, donc /data en prod), pas du code de l'image.
+     */
+    private function dir(): string
+    {
+        $dir = storage_path('app/sitemaps');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        return $dir;
+    }
+
     private function path(string $group, int $index): string
     {
-        return public_path("sitemap-{$group}-{$index}.xml");
+        return $this->dir()."/sitemap-{$group}-{$index}.xml";
     }
 
     /**

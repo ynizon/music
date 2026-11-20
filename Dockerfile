@@ -24,12 +24,17 @@ RUN chmod +x /usr/local/bin/app-entrypoint /usr/local/bin/download_spotify.sh
 
 ENV TRUSTED_PROXIES="10.0.3.0/24 172.16.0.0/12 127.0.0.1" \
     RUN_MIGRATIONS=true \
-    OPCACHE_VALIDATE_TIMESTAMPS=1 \
+    OPCACHE_VALIDATE_TIMESTAMPS=0 \
     COMPOSER_HOME=/tmp/composer \
     COMPOSER_ALLOW_SUPERUSER=1
 
-# Code de référence, copié dans /var/www/html (dossier du NAS) au premier démarrage
-WORKDIR /opt/app
+# Le code est entièrement dans l'image : une nouvelle image = un nouveau code.
+# Les données persistantes sont dans le volume /data (voir docker-compose.yml) :
+#   /data/.env
+#   /data/database/database.sqlite
+#   /data/storage/
+#   /data/public/images/cache/
+WORKDIR /var/www/html
 
 # Dépendances d'abord pour profiter du cache de build
 COPY composer.json composer.lock ./
@@ -38,13 +43,20 @@ COPY packages ./packages
 RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction --prefer-dist
 
 COPY . .
-# storage est exclu du contexte : Laravel a besoin de son arborescence avant tout appel à artisan
-RUN mkdir -p storage/app/download storage/framework/cache storage/framework/sessions \
-        storage/framework/views storage/logs bootstrap/cache public/images/cache \
+# storage est exclu du contexte : Laravel a besoin de son arborescence pour package:discover.
+# Ensuite, les données sont remplacées par des liens vers /data.
+RUN mkdir -p storage/app storage/framework/cache storage/framework/sessions \
+        storage/framework/views storage/logs bootstrap/cache public/images \
     && composer dump-autoload --optimize --no-dev --no-scripts \
-    && php artisan package:discover --ansi
+    && php artisan package:discover --ansi \
+    && rm -rf storage public/images/cache database/database.sqlite .env \
+    && ln -s /data/.env .env \
+    && ln -s /data/storage storage \
+    && ln -s /data/database/database.sqlite database/database.sqlite \
+    && ln -s /data/public/images/cache public/images/cache \
+    && chown -R www-data:www-data bootstrap/cache
 
-WORKDIR /var/www/html
+VOLUME /data
 
 ENTRYPOINT ["app-entrypoint"]
 CMD ["apache2-foreground"]

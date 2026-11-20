@@ -13,59 +13,48 @@ if [ -S /var/run/docker.sock ]; then
     usermod -aG "$sock_group" www-data
 fi
 
-# Le site (code + données) est dans /var/www/html, monté depuis le NAS.
-# Premier démarrage : on y copie le code de l'image sans écraser .env, storage, database...
-if [ ! -f artisan ]; then
-    echo "Code absent : copie du code de l'image dans /var/www/html"
-    cp -an /opt/app/. /var/www/html/ || true
+# Le code est dans l'image. Les données persistantes sont dans /data (volume du NAS),
+# vers lequel pointent des liens : .env, storage, database/database.sqlite, public/images/cache.
+mkdir -p /data/storage/app/download /data/storage/app/sitemaps \
+    /data/storage/framework/cache /data/storage/framework/sessions /data/storage/framework/views \
+    /data/storage/logs /data/database /data/public/images/cache
+
+if [ ! -f /data/.env ]; then
+    echo "ATTENTION : /data/.env introuvable (modèle : .env.example dans l'image)"
 fi
-[ -f .env ] || echo "ATTENTION : /var/www/html/.env introuvable"
+# Base absente : on la crée vide, les migrations construisent le schéma
+[ -f /data/database/database.sqlite ] || touch /data/database/database.sqlite
 
-# vendor absent ou composer.lock modifié : réinstallation des dépendances
-if [ ! -f vendor/composer/installed.json ] || [ composer.lock -nt vendor/composer/installed.json ]; then
-    composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-    touch vendor/composer/installed.json
-    rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
-fi
-
-mkdir -p storage/app/download storage/framework/cache storage/framework/sessions \
-    storage/framework/views storage/logs bootstrap/cache database public/images/cache
-
-# Code modifiable depuis le NAS : il appartient au propriétaire du dossier monté (ou PUID/PGID)
-code_uid=${PUID:-$(stat -c %u /var/www/html)}
-code_gid=${PGID:-$(stat -c %g /var/www/html)}
-find . \( -path ./storage -o -path ./bootstrap/cache -o -path ./database -o -path ./public/images/cache \
-    -o -path ./vendor -o -path './public/sitemap*' \) -prune -o ! -user "$code_uid" -exec chown "$code_uid:$code_gid" {} +
-
-# Dossiers écrits par l'application, restant modifiables par le groupe du propriétaire.
+# Dossiers écrits par l'application, modifiables par le groupe du propriétaire de /data (ou PGID).
 # Ces dossiers contiennent des millions de fichiers (caches d'images, sessions) : le parcours
 # récursif complet prend des heures sur disque dur. Il n'est fait qu'une fois (fichier témoin),
 # ensuite seul le dossier lui-même est vérifié (les fichiers créés par Apache sont déjà corrects ;
 # même le premier niveau de public/images/cache compte environ un million de fichiers).
-for dir in storage bootstrap/cache database public/images/cache; do
+data_gid=${PGID:-$(stat -c %g /data)}
+for dir in /data/storage /data/database /data/public/images/cache; do
     depth="-maxdepth 0"
     [ -f "$dir/.permissions-ok" ] || depth=""
-    find "$dir" $depth \( ! -user www-data -o ! -group "$code_gid" \) -exec chown "www-data:$code_gid" {} +
+    find "$dir" $depth \( ! -user www-data -o ! -group "$data_gid" \) -exec chown "www-data:$data_gid" {} +
     find "$dir" $depth ! -perm -g=w -exec chmod g+rwX {} +
     find "$dir" $depth -type d ! -perm -g=s -exec chmod g+s {} +
-    touch "$dir/.permissions-ok" && chown "www-data:$code_gid" "$dir/.permissions-ok"
+    touch "$dir/.permissions-ok" && chown "www-data:$data_gid" "$dir/.permissions-ok"
 done
-# Sitemaps écrits à la racine de public
-chgrp www-data public && chmod g+w public
-find public -maxdepth 1 -name 'sitemap*' ! -user www-data -exec chown "www-data:$code_gid" {} +
+# La base SQLite crée ses fichiers -wal/-shm à côté d'elle
+chown "www-data:$data_gid" /data/database/database.sqlite
 
 # Fichiers créés par Apache modifiables par le groupe
 umask 0002
 
-[ -f bootstrap/cache/packages.php ] || su -s /bin/sh www-data -c "php artisan package:discover"
+# Les vues compilées (dans storage) peuvent dater d'une image précédente
+su -s /bin/sh www-data -c "php artisan view:clear" || true
 
-if [ "$RUN_MIGRATIONS" = "true" ] && [ -f .env ]; then
+if [ "$RUN_MIGRATIONS" = "true" ] && [ -f /data/.env ]; then
     su -s /bin/sh www-data -c "php artisan migrate --force" || echo "Migrations en échec, voir les logs ci-dessus"
 fi
 
 # TRUSTED_PROXIES peut être défini dans .env (prioritaire sur la variable du conteneur) :
 # Apache le lit dans son environnement (RemoteIPInternalProxy), pas Laravel.
-env_proxies=$(grep -E '^TRUSTED_PROXIES=' .env 2>/dev/null | tail -n 1 | cut -d= -f2- | tr -d "\"'\r")
+env_proxies=$(grep -E '^TRUSTED_PROXIES=' /data/.env 2>/dev/null | tail -n 1 | cut -d= -f2- | tr -d "\"'\r")
 if [ -n "$env_proxies" ]; then
     export TRUSTED_PROXIES="$env_proxies"
 fi

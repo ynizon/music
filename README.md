@@ -20,6 +20,22 @@ php artisan key:generate
 php artisan migrate --seed
 ```
 
+## Docker
+
+The image `ynizon/music` contains all the code: updating the site means pulling a new image.
+Persistent data lives in a volume mounted on `/data` (see `docker-compose.yml`):
+
+```
+/data/.env
+/data/database/database.sqlite
+/data/storage/
+/data/public/images/cache/
+```
+
+Missing folders and an empty database are created on startup, and migrations run automatically
+(`RUN_MIGRATIONS=true`). Sitemaps are generated in `storage/app/sitemaps`
+(`php artisan sitemap:generate`).
+
 ## Spotify Link (open and download)
 Create your app on Spotify and set your api keys in the .env file
 With this, you can :
