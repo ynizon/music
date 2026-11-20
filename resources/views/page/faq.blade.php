@@ -17,7 +17,7 @@ $user = Auth::user();
 								<ul class="faq">
 									<li>
 										<h2>Qu'est ce que site ?</h2>
-										<p>Ce site est un mashup de différents sites (LastFM, Youtube, FlickR, Wikipédia)
+										<p>Ce site est un mashup de différents sites (LastFM, Youtube, Wikipédia)
 										</p>
 									</li>
 

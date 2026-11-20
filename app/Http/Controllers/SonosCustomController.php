@@ -255,7 +255,7 @@ class SonosCustomController extends Controller
     private function cifsUri(string $nasFile): string
     {
         $file = str_replace(['%', '&', '#'], ['%25', '%26', '%23'], $nasFile);
-        $file = utf8_decode($file);//Fix accent
+        $file = mb_convert_encoding($file, 'ISO-8859-1', 'UTF-8');//Fix accent
         return "x-file-cifs:" . $file;
     }
 

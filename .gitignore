@@ -32,3 +32,5 @@ Thumbs.db
 /storage/maj.txt
 /storage/download_spotify.sh
 /public/images/cache/
+/public/sitemap-*.xml
+/public/phpliteadmin.php

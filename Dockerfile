@@ -1,4 +1,4 @@
-FROM php:8.3-apache
+FROM php:8.6-apache
 
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 COPY --from=composer:2.9 /usr/bin/composer /usr/bin/composer
@@ -33,6 +33,8 @@ WORKDIR /opt/app
 
 # Dépendances d'abord pour profiter du cache de build
 COPY composer.json composer.lock ./
+# Paquets locaux (dépôt Composer de type "path")
+COPY packages ./packages
 RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction --prefer-dist
 
 COPY . .

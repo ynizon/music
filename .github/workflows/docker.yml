@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
-  # Rebuild quotidien : récupère automatiquement les correctifs de l'image php:8.3-apache
+  # Rebuild quotidien : récupère automatiquement les correctifs de l'image php:8.6-apache
   schedule:
     - cron: '0 4 * * *'
 

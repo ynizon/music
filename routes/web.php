@@ -27,7 +27,6 @@ Route::middleware(AllowedVisitor::class)->group(function () {
     Route::get('/download', [HomeController::class,'download']);
 
     Route::get('/search', [SearchController::class,'index']);
-    Route::get('/ajax/flip/{artist_name}', [AjaxController::class,'flip']);
     Route::get('/ajax/autocomplete', [AjaxController::class,'autocomplete']);
     Route::post('/ajax/keyword', [AjaxController::class,'keyword']);
 

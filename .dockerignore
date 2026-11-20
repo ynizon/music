@@ -20,3 +20,4 @@ public/images/cache/*
 public/sitemap-*.xml
 storage/*
 bootstrap/cache/*.php
+public/phpliteadmin.php

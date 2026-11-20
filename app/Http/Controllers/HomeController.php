@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 use App\Helpers\Helpers;
-use App\Models\Album;
-use App\Models\Artist;
-use App\Models\Title;
 use App\Repositories\AlbumRepository;
 use App\Repositories\ArtistRepository;
 use App\Repositories\TitleRepository;
+use App\Services\SitemapGenerator;
 use Barryvanveen\Lastfm\Lastfm;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -197,65 +195,13 @@ class HomeController extends Controller
 		return view('page/contact');
 	}
 
-	public function sitemap(Request $request){
+	public function sitemap(SitemapGenerator $generator){
 		set_time_limit(0);
+		$generator->refreshStale();
 
-		$dir = storage_path();
-
-		$tabMaj = array();
-
-		$sFile = $dir."/sitemap_maj.txt";
-		$tabMaj["artist"] = date("Y-m-d");
-		$tabMaj["album"] = date("Y-m-d");
-		$tabMaj["title"] = date("Y-m-d");
-
-		$datetime1 = date_create(date("Y-m-d"));
-
-		$bNew = true;
-		if (file_exists($sFile)){
-			$bNew = false;
-			$tabMaj = json_decode(file_get_contents($sFile),true);
-		}
-
-		foreach ($tabMaj as $field=>$sDate){
-			$datetime2 = date_create($sDate);
-			$interval = date_diff($datetime2,$datetime1);
-			$interval = $interval->format('%a');
-
-			if ($bNew or $interval > 3){
-				switch ($field){
-					case "artist":
-						$infos = Artist::all();
-						break;
-					case "album":
-						$infos = Album::all();
-						break;
-					case "title":
-						$infos = Title::all();
-						break;
-				}
-				$sitemap_url = config("app.sitemap_url")."/sitemap-".$field.".xml";
-
-				$urls = array();
-				foreach ($infos as $info){
-                    $url = config("app.sitemap_url")."/artist/".$info->slug;
-					$urls[$url] = str_replace(" ","T",$info->updated_at)."+00:00";
-				}
-
-				$content = view('page/sitemap-infos',compact("urls","sitemap_url"));
-                file_put_contents($dir."/../public/sitemap-".$field.".xml",$content);
-			}
-		}
-
-		//On ecrit la date du jour pour etre sur que c est MAJ
-		foreach ($tabMaj as $field=>$sDate){
-			$tabMaj[$field] = date("Y-m-d");
-		}
-		file_put_contents($sFile,json_encode($tabMaj));
-
-		$content = view('page/sitemap');
-		return Response($content, '200')->header('Content-Type', 'application/xml');
+		return response($generator->index(), 200)->header('Content-Type', 'application/xml');
 	}
+
 
 	public function download(Request $request){
 		$name = $request->input('name');

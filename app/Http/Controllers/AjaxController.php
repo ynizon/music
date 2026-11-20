@@ -199,9 +199,8 @@ class AjaxController extends BaseController
 			switch ($sMode){
 				case "artist":
 					$sArtist = trim($request->input("term"));
-					$sArtist = utf8_encode($sArtist);
 					$sUrl = "http://ws.audioscrobbler.com/2.0/?method=artist.search&artist=".
-                        urlencode(utf8_decode($sArtist))."&lang=fr&format=json&api_key=".config("lastfm.api_key");
+                        urlencode($sArtist)."&lang=fr&format=json&api_key=".config("lastfm.api_key");
 					$contenu = json_decode(file_get_contents($sUrl));
 					if (is_array($contenu->results->artistmatches->artist)){
 						foreach ($contenu->results->artistmatches->artist as $artist){
@@ -220,8 +219,7 @@ class AjaxController extends BaseController
 
 				case "album":
 					$sAlbum = trim($request->input("term"));
-					$sAlbum = utf8_encode($sAlbum);
-					$sUrl = "http://ws.audioscrobbler.com/2.0/?method=album.search&album=".urlencode(utf8_decode($sAlbum))."&lang=fr&format=json&api_key=".config("lastfm.api_key");
+					$sUrl = "http://ws.audioscrobbler.com/2.0/?method=album.search&album=".urlencode($sAlbum)."&lang=fr&format=json&api_key=".config("lastfm.api_key");
 					$contenu = json_decode(file_get_contents($sUrl));
 					if (is_array($contenu->results->albummatches->album)){
 						foreach ($contenu->results->albummatches->album as $album){
@@ -240,12 +238,10 @@ class AjaxController extends BaseController
 
 				case "title":
 					$sArtist = trim($request->input("q"));
-					$sArtist = utf8_encode($sArtist);
 					$sTitle = trim($request->input("term"));
-					$sTitle = utf8_encode($sTitle);
 					$sUrl = "http://ws.audioscrobbler.com/2.0/?method=track.search&artist=".
-                        urlencode(utf8_decode($sArtist))."&track=".
-                        urlencode(utf8_decode($sTitle))."&lang=fr&format=json&api_key=".config("lastfm.api_key");
+                        urlencode($sArtist)."&track=".
+                        urlencode($sTitle)."&lang=fr&format=json&api_key=".config("lastfm.api_key");
 					$contenu = json_decode(file_get_contents($sUrl));
 					if (is_array($contenu->results->trackmatches->track)){
 						foreach ($contenu->results->trackmatches->track as $track){
@@ -265,38 +261,5 @@ class AjaxController extends BaseController
 
 		}
         return response()->json($json);
-	}
-
-
-	public function flip(Request $request, $artist_name){
-		$photos = array();
-
-		if (config("app.FLICKR_API") != ""){
-			$params = array(
-				'api_key'	=> config("app.FLICKR_API"),
-				'method'	=> 'flickr.photos.search',
-				'tags'	=> $artist_name,
-				'format'	=> 'php_serial',
-			);
-			$encoded_params = array();
-			foreach ($params as $k => $v){
-				$encoded_params[] = urlencode($k).'='.urlencode($v);
-			}
-
-			$url = "https://api.flickr.com/services/rest/?".implode('&', $encoded_params);
-
-			$rsp = file_get_contents($url);
-			$rsp_obj = unserialize($rsp);
-			$tabPhotos = $rsp_obj["photos"]["photo"];
-
-			$i = 1;
-			while  ($i <= 2 and count($tabPhotos)>0){
-				$oPhoto = $tabPhotos[$i];
-				$photos[] ="https://farm".$oPhoto["farm"].".staticflickr.com/".$oPhoto["server"]."/".$oPhoto["id"]."_".$oPhoto["secret"].".jpg";
-				$i++;
-			}
-		}
-
-		return view('search/flip', compact('photos'));
 	}
 }

@@ -172,7 +172,7 @@ class SearchController extends BaseController
 	}
 
     public function franceinfo(Request $request){
-        $get = strtolower($request->input("get"));
+        $get = strtolower((string) $request->input("get"));
 
         $speakers = config('app.SONOS_SPEAKERS') ?: ['Salon' => '192.168.1.15'];
         $ip = array_values($speakers)[0] ?? '192.168.1.15';

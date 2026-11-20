@@ -57,7 +57,6 @@ class ArtistRepository {
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $json =curl_exec($ch);
-        curl_close($ch);
         
         if ($json != ""){
             $json = json_decode($json, true);

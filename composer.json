@@ -6,12 +6,12 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.6",
         "aerni/laravel-spotify": "^3.0",
         "barryvanveen/lastfm": "^2.0",
         "filament/filament": "^4.0",
-        "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1",
+        "laravel/framework": "^13.0",
+        "laravel/tinker": "^3.0",
       "ext-zlib": "*",
         "ext-curl": "*"
     },
@@ -22,7 +22,7 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^11.5.3"
+        "phpunit/phpunit": "^12.0"
     },
     "autoload": {
         "psr-4": {
@@ -74,8 +74,18 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "platform": {
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [{
+        "name": "laravel-spotify",
+        "type": "path",
+        "url": "packages/laravel-spotify",
+        "options": {
+            "symlink": false
+        }
+    }]
 }
