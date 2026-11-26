@@ -10,6 +10,7 @@ use Barryvanveen\Lastfm\Lastfm;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -37,32 +38,41 @@ class HomeController extends Controller
 		//Recupere le top artist
         $artistes = [];
 		$sFile = $dir."/home.txt";
-        if ($sMaj == "" or $interval > 3){
-			file_put_contents($dir."/maj.txt",date("Y-m-d"));
+        if ($sMaj == "" or $interval > 3 or !file_exists($sFile)){
 			$sUrl = "http://ws.audioscrobbler.com/2.0/?method=chart.getTopArtists&lang=fr&format=json&api_key=".
                 config("lastfm.api_key");
 
-            $content = file_get_contents($sUrl);
-            $json = json_decode($content, true);
-            foreach ($json["artists"]['artist'] as $artist) {
-                unset ($artist['image']);
-                $artist['image'] = isset($artist['mbid']) ? Helpers::getPic($artist['mbid']) : "/images/home_default.png";
-                $artistes[] = $artist;
+            // Last.fm indisponible : on garde le dernier classement en cache et on réessaiera
+            $content = @file_get_contents($sUrl);
+            $json = $content ? json_decode($content, true) : null;
+            if (isset($json["artists"]['artist']) && is_array($json["artists"]['artist'])) {
+                foreach ($json["artists"]['artist'] as $artist) {
+                    unset ($artist['image']);
+                    $artist['image'] = !empty($artist['mbid']) ? Helpers::getPic($artist['mbid']) : "/images/home_default.png";
+                    $artistes[] = $artist;
+                }
+                file_put_contents($sFile,json_encode($artistes));
+                file_put_contents($dir."/maj.txt",date("Y-m-d"));
+            } else {
+                Log::warning("Last.fm chart.getTopArtists indisponible");
             }
-
-            file_put_contents($sFile,json_encode($artistes));
 		}
-		$artistes = json_decode(file_get_contents($sFile));
+		$artistes = file_exists($sFile) ? (json_decode(file_get_contents($sFile)) ?: []) : [];
 
 		$preferences = array();
 		$lastfm_login = Cookie::get('lastfm_login');
 		if ($lastfm_login != ""){
-			$lastfm = new Lastfm(new Client(), config("lastfm.api_key"));
-			$preferencesTmp = $lastfm->userTopArtists($lastfm_login)->get();
-            foreach ($preferencesTmp as $preference){
-                $preference['image'] = Helpers::getPic($preference['mbid']);
-                $preferences[] = $preference;
-            }
+			try {
+				$lastfm = new Lastfm(new Client(), config("lastfm.api_key"));
+				$preferencesTmp = $lastfm->userTopArtists($lastfm_login)->get();
+				foreach ($preferencesTmp as $preference){
+					$preference['image'] = Helpers::getPic($preference['mbid']);
+					$preferences[] = $preference;
+				}
+			} catch (\Throwable $e) {
+				// Last.fm indisponible : la page s'affiche sans les artistes du compte
+				Log::warning("Last.fm userTopArtists indisponible : ".$e->getMessage());
+			}
 		}
 
 		//Et si on en trouve pas alors on prend les artistes smiliaires aux dernieres recherches

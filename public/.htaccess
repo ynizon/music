@@ -1,8 +1,11 @@
-# --- Blocage des robots IA / scrapers (ajout 2026-11-07, sauvegarde : .htaccess.bak) ---
+# --- Blocage de tous les robots (403 avant Laravel) ---
+# Le site est réservé aux IP autorisées (RESTRICT_IP) : un robot ne verrait que /busy.
+# Motifs génériques (Applebot/, bingbot/, ElevenlabsCrawler, meta-webindexer, facebookexternalhit...)
+# + robots IA dont le nom ne suit pas ces motifs. Seul robots.txt reste accessible.
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_URI} !^/robots\.txt$
-    RewriteCond %{HTTP_USER_AGENT} (PerplexityBot|Perplexity-User|meta-externalagent|meta-externalfetcher|FacebookBot|ExaSearchBot|Amazonbot|ClaudeBot|Claude-User|Claude-SearchBot|anthropic-ai|GPTBot|ChatGPT-User|OAI-SearchBot|CCBot|Bytespider|cohere-ai|Diffbot|ImagesiftBot|Omgilibot|Timpibot|YouBot|PetalBot|AhrefsBot|SemrushBot|MJ12bot|DotBot) [NC]
+    RewriteCond %{HTTP_USER_AGENT} ([a-z]bot/|crawler|spider|indexer|externalhit|externalagent|externalfetcher|Perplexity-User|Claude-User|ChatGPT-User|anthropic-ai|cohere-ai|Diffbot|Bytespider|python-requests|Scrapy|HeadlessChrome) [NC]
     RewriteRule ^ - [F,L]
 </IfModule>
 # --- fin blocage ---
